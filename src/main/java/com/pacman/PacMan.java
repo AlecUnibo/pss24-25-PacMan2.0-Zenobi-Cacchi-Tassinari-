@@ -26,6 +26,8 @@ public class PacMan extends StackPane {
     private int animationCounter = 0;
     private boolean inTunnel = false;
     private final ScoreManager scoreManager = new ScoreManager();
+    private final GhostManager ghostManager;
+
 
 
     public PacMan(MainMenu menu) {
@@ -40,6 +42,8 @@ public class PacMan extends StackPane {
         // carica risorse e mappa
         imageLoader = new ImageLoader();
         gameMap     = new GameMap(imageLoader);
+        ghostManager = new GhostManager(gameMap.getGhosts(), imageLoader, scoreManager);
+
 
         pacman = gameMap.getPacman();
         setFocusTraversable(true);
@@ -159,12 +163,15 @@ public class PacMan extends StackPane {
         // Collisione con powerfood
         if (gameMap.collectPowerFood(pacman)) {
             scoreManager.addPoints(50);
-            // eventuale logica per rendere fantasmi "scared"
+            ghostManager.triggerScaredMode();
+
         }
 
         // Collisione con fantasmi
         for (Block ghost : gameMap.getGhosts()) {
             if (collision(pacman, ghost)) {
+                ghostManager.update();
+                ghostManager.checkCollisions(pacman);
                 scoreManager.loseLife();
                 if (scoreManager.isGameOver()) {
                     System.out.println("Game Over!");
