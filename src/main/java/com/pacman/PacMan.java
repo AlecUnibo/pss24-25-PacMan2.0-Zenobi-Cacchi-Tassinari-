@@ -25,6 +25,8 @@ public class PacMan extends StackPane {
     private boolean mouthOpen = true;
     private int animationCounter = 0;
     private boolean inTunnel = false;
+    private final ScoreManager scoreManager = new ScoreManager();
+
 
     public PacMan(MainMenu menu) {
         // dimensioni del pannello
@@ -72,6 +74,10 @@ public class PacMan extends StackPane {
         if (pacman != null && pacman.image != null) {
             gc.drawImage(pacman.image, pacman.x, pacman.y, TILE_SIZE, TILE_SIZE);
         }
+        gc.setFill(Color.YELLOW);
+        gc.fillText("Score: " + scoreManager.getScore(), 10, 20);
+        gc.fillText("Lives: " + scoreManager.getLives(), 10, 40);
+
     }
 
     private void movePacman() {
@@ -125,6 +131,8 @@ public class PacMan extends StackPane {
 
     private void update() {
         Block pacman = gameMap.getPacman();
+
+        // Gestione tunnel
         if (!inTunnel) {
             for (Block t : gameMap.getTunnels()) {
                 if (collision(pacman, t)) {
@@ -143,12 +151,38 @@ public class PacMan extends StackPane {
             }
             if (!stillInTunnel) inTunnel = false;
         }
+
+        // Collisione con food
+        int points = gameMap.collectFood(pacman);
+        if (points > 0) scoreManager.addPoints(points);
+
+        // Collisione con powerfood
+        if (gameMap.collectPowerFood(pacman)) {
+            scoreManager.addPoints(50);
+            // eventuale logica per rendere fantasmi "scared"
+        }
+
+        // Collisione con fantasmi
+        for (Block ghost : gameMap.getGhosts()) {
+            if (collision(pacman, ghost)) {
+                scoreManager.loseLife();
+                if (scoreManager.isGameOver()) {
+                    System.out.println("Game Over!");
+                    // eventualmente mostrare schermata di fine gioco
+                } else {
+                    // Resetta solo posizione di pacman e fantasmi
+                    gameMap.resetEntities();
+                }
+                break;
+            }
+        }
     }
+
 
     private boolean collision(Block a, Block b) {
         return a.x < b.x + b.width &&
-            a.x + a.width > b.x &&
-            a.y < b.y + b.height &&
-            a.y + a.height > b.y;
+                a.x + a.width > b.x &&
+                a.y < b.y + b.height &&
+                a.y + a.height > b.y;
     }
 }
