@@ -28,8 +28,6 @@ public class PacMan extends StackPane {
     private final ScoreManager scoreManager = new ScoreManager();
     private final GhostManager ghostManager;
 
-
-
     public PacMan(MainMenu menu) {
         // dimensioni del pannello
         setPrefSize(BOARD_WIDTH, BOARD_HEIGHT);
