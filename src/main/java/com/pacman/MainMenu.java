@@ -66,10 +66,10 @@ public class MainMenu {
 
             Label title = new Label("ISTRUZIONI");
             Label info  = new Label("""
-                    • Usa le FRECCE per muoverti •
-                    • Mangia i puntini per fare punti •
-                    • Evita i fantasmi •
-                    • Raccogli la frutta per punti extra •
+                    • Usa le FRECCE per muoverti 
+                    • Mangia i puntini per fare punti 
+                    • Evita i fantasmi 
+                    • Raccogli la frutta per punti extra 
                     """);
             Button back  = new Button("INDIETRO");
 
@@ -87,7 +87,7 @@ public class MainMenu {
             root.getChildren().setAll(instructionsBox);
         });
 
-        // Skin closet (da implementare)
+        // Armadio Skin 
         skinCloset.setOnMouseClicked(e -> System.out.println("ARMADIO SKIN: da implementare"));
 
         menuBox.getChildren().addAll(startButton, instructions, skinCloset);

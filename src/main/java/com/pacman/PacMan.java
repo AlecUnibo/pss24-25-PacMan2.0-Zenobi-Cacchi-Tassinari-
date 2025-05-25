@@ -172,7 +172,7 @@ public class PacMan extends StackPane {
                 ghostManager.checkCollisions(pacman);
                 scoreManager.loseLife();
                 if (scoreManager.isGameOver()) {
-                    System.out.println("Game Over!");
+                    System.out.println("!Game Over!");
                     // eventualmente mostrare schermata di fine gioco
                 } else {
                     // Resetta solo posizione di pacman e fantasmi
