@@ -20,8 +20,8 @@ public class FruitManager {
     private long lastPhaseStart;
     private static final int MAX_FRUITS_PER_LEVEL  = 2;
     private static final int FRUIT_VISIBLE_MS      = 8000;
-    private static final int FIRST_DELAY_MS        = 20000;
-    private static final int SECOND_DELAY_MS       = 20000;
+    private static final int FIRST_DELAY_MS        = 10000;
+    private static final int SECOND_DELAY_MS       = 10000;
 
     public FruitManager(PacMan game, ImageLoader loader) {
         this.game = game;
@@ -71,7 +71,7 @@ public class FruitManager {
             } else if (phase == 1) {
                 long start = System.currentTimeMillis();
                 while (running && !fruits.isEmpty() &&
-                       System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
+                        System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -88,7 +88,7 @@ public class FruitManager {
         if (phase == 3 && running) {
             long start = System.currentTimeMillis();
             while (running && !fruits.isEmpty() &&
-                   System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
+                    System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ignored) {}
@@ -96,7 +96,7 @@ public class FruitManager {
             removeLastFruit();
         }
     }
-    
+
     // Genera un nuovo frutto al centro della mappa, finché non si supera il numero massimo
     private void spawnFruit() {
         if (fruits.size() >= MAX_FRUITS_PER_LEVEL) return;
@@ -120,9 +120,9 @@ public class FruitManager {
         for (int i = 0; i < fruits.size(); i++) {
             Fruit f = fruits.get(i);
             if (pacman.x < f.getX() + PacMan.TILE_SIZE &&
-                pacman.x + pacman.width > f.getX() &&
-                pacman.y < f.getY() + PacMan.TILE_SIZE &&
-                pacman.y + pacman.height > f.getY()) {
+                    pacman.x + pacman.width > f.getX() &&
+                    pacman.y < f.getY() + PacMan.TILE_SIZE &&
+                    pacman.y + pacman.height > f.getY()) {
                 fruits.remove(i);
                 if (phase == 1) {
                     phase = 2;
@@ -150,7 +150,7 @@ public class FruitManager {
     private void activateSpeedPower() {
         game.setSpeedMultiplier(2.0);
         new Thread(() -> {
-            try { Thread.sleep(10_000); } catch (InterruptedException ignored) {}
+            try { Thread.sleep(5_000); } catch (InterruptedException ignored) {}
             Platform.runLater(() -> game.setSpeedMultiplier(1.0));
         }, "SpeedPowerTimer").start();
     }
