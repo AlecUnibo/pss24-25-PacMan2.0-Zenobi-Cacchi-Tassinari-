@@ -2,7 +2,7 @@
 //Sostituire questo codice a quello presente nel file GhostManager.java, per testare il movimento dei fantasmi;
 import java.util.*;
 
-public class GhostManager {
+public class Ghost_Movements_Test {
 
     private static final int ghostSPEED = 2;
     private static final int PINK_PREDICT_TILES = 4;
@@ -17,7 +17,7 @@ public class GhostManager {
     private final Set<Block> ghostsInTunnel = new HashSet<>();
     private final Random rand = new Random();
 
-    public GhostManager(List<Block> allGhosts, Block ghostPortal, GameMap map, PacMan game) {
+    public Ghost_Movements_Test(List<Block> allGhosts, Block ghostPortal, GameMap map, PacMan game) {
         this.map = map;
         this.game = game;
         this.ghostPortal = ghostPortal;
