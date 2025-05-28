@@ -1,5 +1,5 @@
-package com.pacman;
 
+//Sostituire questo codice a quello presente nel file GhostManager.java, per testare il movimento dei fantasmi;
 import java.util.*;
 
 public class GhostManager {
