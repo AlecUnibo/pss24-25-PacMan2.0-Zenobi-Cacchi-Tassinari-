@@ -58,27 +58,24 @@ public class SoundManager {
         }
     }
 
-    /**
-     * Riproduce una singola istanza del suono (non in loop).
-     * @param name nome logico del suono
-     */
+     /* Riproduce una singola istanza del suono indicato.*/
     public static void playSound(String name) {
         Clip clip = soundClips.get(name);
         if (clip == null) return;
-        if (clip.isRunning()) clip.stop(); // Ferma eventuale riproduzione precedente
-        clip.setFramePosition(0);          // Riavvolge all'inizio
-        clip.start();                      // Avvia il suono
+        if (clip.isRunning()) clip.stop();
+        clip.setFramePosition(0);
+        clip.start();
     }
 
-    /**
-     * Silenzia tutti i suoni caricati, usando mute o riducendo il volume al minimo.
-     */
+     /*Mette in muto tutti i suoni, usando BooleanControl se disponibile o volume a minimo.*/
     public static void muteAll() {
+        // Boolean mute
         for (BooleanControl bc : muteControls.values()) {
-            bc.setValue(true); // Mute abilitato
+            bc.setValue(true);
         }
+        // fallback volume
         for (FloatControl fc : volumeControls.values()) {
-            fc.setValue(fc.getMinimum()); // Volume al minimo
+            fc.setValue(fc.getMinimum());
         }
     }
 
