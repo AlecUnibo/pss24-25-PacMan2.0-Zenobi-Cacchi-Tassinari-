@@ -190,4 +190,27 @@ public class PacMan extends StackPane {
                 a.y < b.y + b.height &&
                 a.y + a.height > b.y;
     }
-}
+
+     int foodScore = gameMap.collectFood(pacman);
+        if (foodScore > 0) {
+            SoundManager.playSound("dot");
+            score += foodScore;
+        }
+        if (gameMap.collectPowerFood(pacman)) {
+            score += 50;
+            ghostManager.activateScaredMode();
+        }
+        int prevScore = score;
+        score += fruitManager.collectFruit(pacman);
+        if (score > prevScore) {
+            int gained = score - prevScore;
+            FruitManager.FruitType type = switch (gained) {
+                case 200 -> FruitManager.FruitType.CHERRY;
+                case 400 -> FruitManager.FruitType.APPLE;
+                case 800 -> FruitManager.FruitType.STRAWBERRY;
+                default  -> null;
+            };
+            if (type != null) scoreManager.addCollectedFruit(type);
+            SoundManager.playSound("fruit");
+        }
+    }

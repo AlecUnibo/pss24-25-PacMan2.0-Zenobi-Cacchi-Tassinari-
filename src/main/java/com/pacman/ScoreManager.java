@@ -79,9 +79,9 @@ public class ScoreManager {
 
         // Icona volume in basso a destra
         Image volumeImage = muted ? loader.getVolumeOffImage() : loader.getVolumeOnImage();
-        double iconSize   = tileSize * 0.8;
-        double iconX      = boardWidth - iconSize - 5;
-        double iconY      = boardHeight + tileSize - iconSize - 5;
+        double iconSize   = tileSize * 1;
+        double iconX      = boardWidth - iconSize - 6;
+        double iconY      = boardHeight + tileSize - iconSize - 6;
         gc.drawImage(volumeImage, iconX, iconY, iconSize, iconSize);
     }
 
