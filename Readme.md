@@ -70,7 +70,7 @@ Il problema da affrontare è quello di modellare un ambiente interattivo in cui:
 
 * Fantasmi si muovono autonomamente nel Labirinto.
 
-* Il food è posizionato nel Labirinto e scompare una volta raccolto.
+* Il food è posizionato nel Labirinto e scompare una volta raccolto, oppure dopo 8 secondo se non si è ancora mangiato.
 
 * La raccolta di un powerfood modifica temporaneamente il comportamento dei Fantasmi. 
 
@@ -123,4 +123,27 @@ classDiagram
     Livello --> Punteggio : aggiorna
  ```
 
- 
+## DESIGN
+In questo capitolo vengono illustrate le strategie adottate per soddisfare i requisiti emersi durante la fase di analisi, con 
+un'attenzione particolare alla struttura architetturale e alle scelte progettuali più rilevanti.
+
+L'applicazione PacMan 2.0 è stata sviluppata adottando un’architettura modulare, pensata per garantire chiarezza nella distribuzione 
+delle responsabilità tra le diverse componenti. Il modello architetturale di riferimento si ispira al pattern MVC (Model-View-Controller),
+adattato al contesto specifico del progetto.
+
+Il Model ha il compito di gestire lo stato interno del gioco: la posizione dei personaggi, la configurazione della mappa, il punteggio 
+accumulato e le vite rimanenti. La View, resa possibile attraverso l’uso di JavaFX, si occupa della rappresentazione visiva 
+dell’interfaccia di gioco, inclusi i personaggi, gli oggetti e gli effetti animati.
+
+Questa struttura ha permesso uno sviluppo ordinato e scalabile dell’applicazione, rendendo più agevole l’implementazione e la 
+manutenzione di funzionalità specifiche come la gestione dei fantasmi, dei frutti bonus o degli elementi raccolti lungo il percorso.
+
+### Architettura dei componenti
+
+Il punto d’ingresso dell’applicazione è rappresentato dalla classe App.java, responsabile dell’inizializzazione dell’ambiente JavaFX. 
+Questa classe mostra il menu principale, da cui è possibile avviare una partita o uscire dal gioco, e si occupa di avviare la schermata 
+di gioco vera e propria.
+
+Al centro della logica di gioco si trova PacMan.java, che gestisce il ciclo di vita della partita. Qui si coordinano l’avanzamento 
+temporale, il movimento dei personaggi, il rilevamento delle collisioni e l’aggiornamento dello stato del gioco (vite, punteggio, 
+oggetti raccolti). Questa classe funge da nucleo attorno al quale ruotano tutte le altre componenti.
