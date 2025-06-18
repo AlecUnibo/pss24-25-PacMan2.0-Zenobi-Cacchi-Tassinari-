@@ -12,24 +12,31 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 public class PacMan extends Pane {
+
+    // Dimensioni della griglia di gioco
     public static final int TILE_SIZE    = 32;
     public static final int ROW_COUNT    = 22;
     public static final int COLUMN_COUNT = 19;
     public static final int BOARD_WIDTH  = COLUMN_COUNT * TILE_SIZE;
     public static final int BOARD_HEIGHT = ROW_COUNT * TILE_SIZE;
-    private static final int pacmanSPEED = 2;
+    private static final int pacmanSPEED = 2;  // velocità base di Pacman
+
+    // Stato di gioco
     private boolean started = false;
     private final GraphicsContext gc;
     private AnimationTimer       gameLoop;
     private Block pacman;
+
+    // Stato del personaggio e punteggio
     private int   score  = 0;
     private int   lives  = 3;
     private int   level  = 1;
+    private double speedMultiplier = 1.0;
     private boolean gameOver          = false;
     private boolean flashing          = false;
     private boolean waitingForRestart = false;
     private boolean waitingForLifeKey = false;
-    private double speedMultiplier = 1.0;
+
     private KeyCode currentDirection = null;
     private KeyCode storedDirection  = null;
     private boolean inTunnel         = false;
@@ -50,7 +57,7 @@ public class PacMan extends Pane {
 
     public PacMan(MainMenu menu) {
         this.mainMenu = menu;
-
+        // Carica effetti sonori
         SoundManager.loadSound("start",     "sounds/start.wav");
         SoundManager.loadSound("death",     "sounds/death.wav");
         SoundManager.loadSound("dot",       "sounds/dot.wav");
@@ -58,12 +65,17 @@ public class PacMan extends Pane {
         SoundManager.loadSound("eat_ghost", "sounds/eat_ghost.wav");
         SoundManager.loadSound("siren_ghost", "sounds/siren_ghost.wav");
 
+        // Setup canvas per il rendering
         Canvas canvas = new Canvas(BOARD_WIDTH, BOARD_HEIGHT + TILE_SIZE);
         gc = canvas.getGraphicsContext2D();
         getChildren().add(canvas);
+
+        // Carica font personalizzati
         scoreFont     = Font.loadFont(getClass().getResource("/assets/fonts/PressStart2P.ttf").toExternalForm(), 12);
         gameOverFont  = Font.loadFont(getClass().getResource("/assets/fonts/PressStart2P.ttf").toExternalForm(), 48);
         returnKeyFont = Font.loadFont(getClass().getResource("/assets/fonts/PressStart2P.ttf").toExternalForm(), 16);
+
+        // Inizializza loader immagini e manager di gioco
         imageLoader  = new ImageLoader();
         gameMap      = new GameMap(imageLoader);
         fruitManager = new FruitManager(this, imageLoader);
@@ -76,6 +88,7 @@ public class PacMan extends Pane {
             soundManager
         );
 
+        // Posiziona Pacman nella mappa
         gameMap.resetEntities();
         ghostManager.resetGhosts(gameMap.getGhosts(), gameMap.getGhostPortal(), gameMap.getPowerFoods());
         scoreManager = new ScoreManager(scoreFont, imageLoader);
@@ -83,6 +96,7 @@ public class PacMan extends Pane {
 
         setFocusTraversable(true);
 
+        // Gestione input da tastiera
         setOnKeyPressed(e -> {
             if (waitingForStartSound || waitingForDeathSound) return;
             if (!started) {
@@ -92,8 +106,10 @@ public class PacMan extends Pane {
             }
         });
 
+        // Disegna stato iniziale
         draw();
 
+        // Avvia suono di "ready" prima di iniziare
         waitingForStartSound = true;
         Clip startClip = SoundManager.getClip("start");
         if (startClip != null) {
@@ -105,6 +121,8 @@ public class PacMan extends Pane {
             startClip.setFramePosition(0);
             startClip.start();
         }
+
+        // Click su icona volume per silenziare
         setOnMouseClicked(e -> {
             requestFocus();
 
@@ -128,6 +146,7 @@ public class PacMan extends Pane {
         });
     }
 
+    // Inizia il gioco dopo la direzione iniziale
     private void startAfterReady(KeyCode initialDir) {
         if (started) return;
         if (keyToDir(initialDir) == null) return;
@@ -140,20 +159,23 @@ public class PacMan extends Pane {
         startGameLoop();
     }
 
+    // Loop di gioco principale (tile update)
     private void startGameLoop() {
         gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (!gameOver && !flashing) {
+                    // Cambia direzione se possibile
                     if (storedDirection != null && gameMap.canMove(pacman, storedDirection)) {
                         currentDirection = storedDirection;
                         applyImage(currentDirection);
                         storedDirection = null;
                     }
                     movePacman();
-                    ghostManager.moveGhosts(); 
+                    ghostManager.moveGhosts();
                     score += ghostManager.handleGhostCollisions(pacman, PacMan.this::loseLife);
                     draw();
+                    // Se non rimangono cibi, avanza livello
                     if (gameMap.getFoods().isEmpty() && gameMap.getPowerFoodCount() == 0) {
                         nextLevel();
                     }
@@ -167,6 +189,7 @@ public class PacMan extends Pane {
         return 11;
     }
 
+    // Gestisce la logica di movimento di Pacman
     private void movePacman() {
         if (currentDirection == null) return;
         Direction dir = keyToDir(currentDirection);
@@ -264,6 +287,7 @@ public class PacMan extends Pane {
         }
     }
 
+    // Trasforma KeyCode in Direction
     private Direction keyToDir(KeyCode k) {
         return switch (k) {
             case UP    -> Direction.UP;
@@ -286,10 +310,10 @@ public class PacMan extends Pane {
         return Direction.randomDirection();
     }
 
+    // Disegna tutti gli elementi di gioco
     private void draw() {
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT + TILE_SIZE);
-
         gc.save();
         gc.translate(0, TILE_SIZE);
         gameMap.draw(gc);
@@ -304,6 +328,7 @@ public class PacMan extends Pane {
         }
     }
 
+    // Applica l'immagine corrente di Pacman (aperta/chiusa)
     private void applyImage(KeyCode dir) {
         if (!mouthOpen) {
             pacman.image = imageLoader.getPacmanClosedImage();
@@ -318,6 +343,7 @@ public class PacMan extends Pane {
         }
     }
 
+    // Gestisce la pressione dei tasti durante il gioco
     private void handleKeyPress(KeyCode key) {
         if (flashing) return;
         if (gameOver) { mainMenu.returnToMenu(); return; }
@@ -347,6 +373,7 @@ public class PacMan extends Pane {
         if (keyToDir(key) != null) storedDirection = key;
     }
 
+    // Collisione rettangolare base
     private boolean collision(Block a, Block c) {
         return a.x < c.x + c.width &&
                a.x + a.width > c.x &&
@@ -360,6 +387,7 @@ public class PacMan extends Pane {
         return t.getLayoutBounds().getWidth();
     }
 
+    // Gestisce la perdita di una vita
     private void loseLife() {
         SoundManager.stopSound("siren_ghost");
         gameLoop.stop();
@@ -382,6 +410,7 @@ public class PacMan extends Pane {
         }
     }
 
+    // Messaggio GAME OVER
     private void drawGameOver() {
         gc.setFill(Color.ORANGE);
         gc.setFont(gameOverFont);
@@ -395,6 +424,7 @@ public class PacMan extends Pane {
         gc.fillText(prompt, (BOARD_WIDTH - pw) / 2, (BOARD_HEIGHT + TILE_SIZE) / 2 + 40);
     }
 
+    // Passa al livello successivo con effetto lampeggio
     private void nextLevel() {
         SoundManager.stopSound("siren_ghost");
         speedMultiplier = 1.0;
@@ -412,6 +442,7 @@ public class PacMan extends Pane {
     public double getSpeedMultiplier()   { return speedMultiplier; }
     public void freezeGhosts(long durationMs) { ghostManager.freeze(durationMs); }
 
+    // Effetto lampeggio mura e reset stato
     private void flashWalls() {
         new Thread(() -> {
             try {
@@ -438,6 +469,7 @@ public class PacMan extends Pane {
         }).start();
     }
 
+    // Dopo il suono di morte, decidi se game over o continua
     private void proceedAfterDeathSound() {
         waitingForDeathSound = false;
         if (lives <= 0) { gameOver = true; draw(); return; }
