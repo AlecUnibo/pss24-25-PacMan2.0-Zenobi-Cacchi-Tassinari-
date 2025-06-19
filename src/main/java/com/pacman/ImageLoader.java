@@ -3,42 +3,32 @@ package com.pacman;
 import javafx.scene.image.Image;
 
 public class ImageLoader {
-    // Immagine del muro
     private final Image wallImage;
-    // Immagini di Pacman nelle varie direzioni
     private final Image pacmanUpImage;
     private final Image pacmanDownImage;
     private final Image pacmanLeftImage;
     private final Image pacmanRightImage;
-    // Immagine di Pacman con bocca chiusa (stato fermo)
     private final Image pacmanCloseImage;
-    // Immagini per l'animazione della morte di Pacman
     private final Image pacmanDeath1Image;
     private final Image pacmanDeath2Image;
     private final Image pacmanDeath3Image;
-    // Immagini dei fantasmi
     private final Image blueGhostImage;
     private final Image orangeGhostImage;
     private final Image pinkGhostImage;
     private final Image redGhostImage;
-    // Immagini del cibo potenziato e dei frutti
     private final Image powerFoodImage;
     private final Image cherryImage;
     private final Image appleImage;
     private final Image strawberryImage;
-    // Stati speciali dei fantasmi
     private final Image scaredGhostImage;
     private final Image whiteGhostImage;
-    // Variante bianca del muro (usata per animazioni o effetti)
     private final Image wallWhiteImage;
-    // Icone per il controllo del volume
     private final Image volumeOnImage;
     private final Image volumeOffImage;
-    // Istruzione freccia (usata nel tutorial o overlay)
     private final Image arrowInstructionImage;
 
+
     public ImageLoader() {
-        // Caricamento delle immagini all'avvio
         wallImage        = load("/assets/wall.png");
         pacmanUpImage    = load("/assets/pacmanUp.png");
         pacmanDownImage  = load("/assets/pacmanDown.png");
@@ -64,14 +54,10 @@ public class ImageLoader {
         arrowInstructionImage = load("/assets/arrow_instruction.png");
     }
 
-    /**
-     * Metodo di utilità per caricare un'immagine dal percorso specificato
-     */
     private Image load(String path) {
         return new Image(getClass().getResource(path).toExternalForm());
     }
 
-    // Metodi getter per accedere alle immagini caricate
     public Image getWallImage()           { return wallImage; }
     public Image getPacmanUpImage()       { return pacmanUpImage; }
     public Image getPacmanDownImage()     { return pacmanDownImage; }
@@ -95,4 +81,5 @@ public class ImageLoader {
     public Image getVolumeOnImage()       { return volumeOnImage; }
     public Image getVolumeOffImage()      { return volumeOffImage; }
     public Image arrowInstructionImage()  { return arrowInstructionImage; }
+
 }
