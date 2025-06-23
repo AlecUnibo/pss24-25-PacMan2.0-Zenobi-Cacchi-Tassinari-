@@ -22,13 +22,13 @@ public class ScoreManager {
         return muted;
     }
 
-    // Inizializza il gestore punteggio con il font per il testo e il loader immagini
+    /** Inizializza il gestore punteggio con il font per il testo e il loader immagini. */
     public ScoreManager(Font scoreFont, ImageLoader loader) {
         this.scoreFont = scoreFont;
         this.loader    = loader;
     }
 
-    // Disegna la barra in alto con vite, punteggio, livello e frutti raccolti
+    /** Disegna la barra in alto con vite, punteggio, livello e frutti raccolti. */
     public void drawScoreboard(GraphicsContext gc,
                                int lives,
                                int score,
@@ -85,7 +85,7 @@ public class ScoreManager {
         gc.drawImage(volumeImage, iconX, iconY, iconSize, iconSize);
     }
 
-    // Aggiunge l’immagine del frutto raccolto alla lista per il display successivo
+    /** Aggiunge l’immagine del frutto raccolto alla lista per il display successivo. */
     public void addCollectedFruit(FruitManager.FruitType type) {
         Image img = switch (type) {
             case CHERRY     -> loader.getCherryImage();
@@ -95,7 +95,7 @@ public class ScoreManager {
         collectedFruits.add(img);
     }
 
-    // Restituisce il raccolto corrente
+    /** Restituisce il raccolto corrente. */
     public List<Image> getCollectedFruits() {
         return collectedFruits;
     }

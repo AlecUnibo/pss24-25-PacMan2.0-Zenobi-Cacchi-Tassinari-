@@ -11,7 +11,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.net.URL;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
@@ -26,7 +25,7 @@ public class MainMenu {
     private final ImageLoader imageLoader;
 
 
-    // Costruisce il menu principale, prepara stage, root e font e chiama buildMenu()
+    // Costruisce il menu principale, prepara stage, root e font e chiama buildMenu(). 
     public MainMenu(Stage stage) {
         this.primaryStage = stage;
         this.root = new StackPane();
@@ -36,7 +35,7 @@ public class MainMenu {
         buildMenu();
     }
 
-    // Carica il font custom delle voci di menu, o usa il default in caso d’errore
+    // Carica il font custom delle voci di menu, o usa il default in caso d’errore.
     private Font loadMenuFont() {
         URL fontUrl = getClass().getResource("/assets/fonts/PressStart2P.ttf");
         if (fontUrl == null) return Font.getDefault();
@@ -44,7 +43,7 @@ public class MainMenu {
         return (loaded != null ? loaded : Font.getDefault());
     }
 
-    // Costruisce e mostra la schermata delle voci di menu e i loro gestori di evento 
+    // Costruisce e mostra la schermata delle voci di menu e i loro gestori di evento. 
     private void buildMenu() {
         VBox menuBox = new VBox(20);
         menuBox.setAlignment(Pos.CENTER);
@@ -127,7 +126,6 @@ public class MainMenu {
             livesLabel.setFont(menuFont);
             livesLabel.setTextFill(Color.WHITE);
             livesLabel.setWrapText(true);
-            livesLabel.setPreserveRatio(true);
             livesLabel.setMaxWidth(500);
 
             Button back = new Button("INDIETRO");
@@ -148,21 +146,21 @@ public class MainMenu {
 }
 
 
-    // Inizia una nuova partita creando il pannello di gioco e sostituendo il menu
+    // Inizia una nuova partita creando il pannello di gioco e sostituendo il menu.
     private void launchGame() {
         PacMan pacmanGame = new PacMan(this); 
         root.getChildren().setAll(pacmanGame);
         pacmanGame.requestFocus();
     }
 
-    // Rende visibile questo menu sullo stage principale
+    // Rende visibile questo menu sullo stage principale. 
     public void show() {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
     }
 
-    // Torna alla schermata del menu principale ricostruendolo da zero
+    // Torna alla schermata del menu principale ricostruendolo da zero. 
     public void returnToMenu() {
         buildMenu();
         show();

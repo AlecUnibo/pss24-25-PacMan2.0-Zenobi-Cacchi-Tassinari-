@@ -71,7 +71,7 @@ public class FruitManager {
             } else if (phase == 1) {
                 long start = System.currentTimeMillis();
                 while (running && !fruits.isEmpty() &&
-                        System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
+                       System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -88,7 +88,7 @@ public class FruitManager {
         if (phase == 3 && running) {
             long start = System.currentTimeMillis();
             while (running && !fruits.isEmpty() &&
-                    System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
+                   System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ignored) {}
@@ -96,7 +96,7 @@ public class FruitManager {
             removeLastFruit();
         }
     }
-
+    
     // Genera un nuovo frutto al centro della mappa, finché non si supera il numero massimo
     private void spawnFruit() {
         if (fruits.size() >= MAX_FRUITS_PER_LEVEL) return;
@@ -120,9 +120,9 @@ public class FruitManager {
         for (int i = 0; i < fruits.size(); i++) {
             Fruit f = fruits.get(i);
             if (pacman.x < f.getX() + PacMan.TILE_SIZE &&
-                    pacman.x + pacman.width > f.getX() &&
-                    pacman.y < f.getY() + PacMan.TILE_SIZE &&
-                    pacman.y + pacman.height > f.getY()) {
+                pacman.x + pacman.width > f.getX() &&
+                pacman.y < f.getY() + PacMan.TILE_SIZE &&
+                pacman.y + pacman.height > f.getY()) {
                 fruits.remove(i);
                 if (phase == 1) {
                     phase = 2;
@@ -130,7 +130,7 @@ public class FruitManager {
                     lastPhaseStart = System.currentTimeMillis();
                     if (worker != null) worker.interrupt();
                 }
-                // con 33% estrae un superpotere
+                // con 33% da un superpotere
                 if (rand.nextDouble() < 0.33) {
                     // decide se speed o freeze (50/50)
                     if (rand.nextBoolean()) {

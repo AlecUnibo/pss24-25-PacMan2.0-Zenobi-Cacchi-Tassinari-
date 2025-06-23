@@ -11,7 +11,7 @@ public class SoundManager {
     private static final Map<String, BooleanControl> muteControls = new HashMap<>();
     private static final Map<String, FloatControl> volumeControls = new HashMap<>();
 
-    // Carica un file audio in memoria sotto la chiave specificata
+    /*Carica un file audio in memoria sotto la chiave specificata.*/
     public static void loadSound(String name, String resourcePath) {
         try {
             URL soundURL = SoundManager.class.getClassLoader().getResource(resourcePath);
@@ -45,7 +45,7 @@ public class SoundManager {
         }
     }
 
-    // Riproduce una singola istanza del suono indicato
+    /* Riproduce una singola istanza del suono indicato.*/
     public static void playSound(String name) {
         Clip clip = soundClips.get(name);
         if (clip == null) return;
@@ -54,7 +54,7 @@ public class SoundManager {
         clip.start();
     }
 
-    // Mette in muto tutti i suoni, usando BooleanControl se disponibile o volume a minimo
+    /*Mette in muto tutti i suoni, usando BooleanControl se disponibile o volume a minimo.*/
     public static void muteAll() {
         // Boolean mute
         for (BooleanControl bc : muteControls.values()) {
@@ -66,7 +66,7 @@ public class SoundManager {
         }
     }
 
-    // Rimuove il muto, ripristinando BooleanControl e volume default
+    /*Rimuove il muto, ripristinando BooleanControl e volume default.*/
     public static void unmuteAll() {
         for (BooleanControl bc : muteControls.values()) {
             bc.setValue(false);
@@ -76,7 +76,7 @@ public class SoundManager {
         }
     }
 
-    // Esegue in loop continuo il suono indicato finché non viene fermato
+    /*Esegue in loop continuo il suono indicato finché non viene fermato.*/
     public static void loopSound(String name) {
         Clip clip = soundClips.get(name);
         if (clip == null) return;
@@ -85,7 +85,7 @@ public class SoundManager {
         }
     }
 
-    // Interrompe la riproduzione in corso del suono indicato, se è in esecuzione
+    /*Interrompe la riproduzione in corso del suono indicato, se è in esecuzione.*/
     public static void stopSound(String name) {
         Clip clip = soundClips.get(name);
         if (clip != null && clip.isRunning()) {
@@ -93,7 +93,7 @@ public class SoundManager {
         }
     }
 
-    // Restituisce il Clip associato al nome
+    /*Restituisce il Clip associato al nome.*/
     public static Clip getClip(String name) {
         return soundClips.get(name);
     }
