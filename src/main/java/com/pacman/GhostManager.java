@@ -1,47 +1,39 @@
 package com.pacman;
 
+import com.strategy.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+
 import java.util.*;
 
 public class GhostManager {
 
     private static final long SCARED_DURATION_MS = 6_000;
-    private static final long ORANGE_PHASE_MS    = 5_000;
-    private static final int  PINK_PREDICT_TILES = 4;
-    private static final int  ghostSPEED               = 2;
-    private final List<Block>        ghosts;
-    private final List<Block>        cagedGhosts;
+    private final List<Block> ghosts;
+    private final List<Block> cagedGhosts;
     private final List<RespawnGhost> respawningGhosts;
-    private Block                    ghostPortal;
-    private final GameMap            map;
-    private final PacMan             game;
+    private Block ghostPortal;
+    private final GameMap map;
+    private final PacMan game;
     private final Map<Block, Long> cageReleaseTime = new HashMap<>();
-    private static final long BLUE_DELAY_MS   = 2_000;
+    private static final long BLUE_DELAY_MS = 2_000;
     private static final long ORANGE_DELAY_MS = 4_000;
-    private static final long PINK_DELAY_MS   = 6_000;
+    private static final long PINK_DELAY_MS = 6_000;
     private boolean cageTimerStarted = false;
     private boolean ghostsAreScared = false;
-    private long    scaredEndTime   = 0;
+    private long scaredEndTime = 0;
     private final Image scaredGhostImage;
     private final Image whiteGhostImage;
     private final ImageLoader imageLoader;
-    private final Map<Block, Long> nextChangeTime = new HashMap<>();
-    private final Random          rand           = new Random();
     private final Set<Block> ghostsInTunnel = new HashSet<>();
     private boolean frozen = false;
     private long frozenEndTime = 0;
 
-    private final Map<Block, Boolean> orangeChaseState = new HashMap<>();
-    private static final int PINK_PHASE_MS = 10000;
+    // Strategie base per ogni fantasma
+    private final Map<Block, GhostMovementStrategy> baseStrategies = new HashMap<>();
+    private final ScaredGhostStrategy scaredStrategy;
 
-
-    private long randomInterval() { 
-        return (4 + rand.nextInt(3)) * 1000L; 
-    }
-
-    // Inizializza i fantasmi: RED parte subito, gli altri restano in gabbia
     public GhostManager(List<Block> allGhosts,
                         Block ghostPortal,
                         List<Block> powerFoods,
@@ -49,30 +41,31 @@ public class GhostManager {
                         PacMan game,
                         SoundManager soundManager) {
         this.map = map;
-        this.imageLoader      = new ImageLoader();
+        this.imageLoader = new ImageLoader();
         this.scaredGhostImage = imageLoader.getScaredGhostImage();
-        this.whiteGhostImage  = imageLoader.getWhiteGhostImage();
-        this.ghosts           = new ArrayList<>();
-        this.cagedGhosts      = new ArrayList<>();
+        this.whiteGhostImage = imageLoader.getWhiteGhostImage();
+        this.ghosts = new ArrayList<>();
+        this.cagedGhosts = new ArrayList<>();
         this.respawningGhosts = new ArrayList<>();
-        this.ghostPortal      = ghostPortal;
-        this.game             = game;
+        this.ghostPortal = ghostPortal;
+        this.game = game;
+        this.scaredStrategy = new ScaredGhostStrategy(map, game);
 
+        // Inizializza fantasmi: RED parte subito, altri in gabbia
         Block red = allGhosts.stream()
             .filter(g -> g.ghostType == Block.GhostType.RED)
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Manca il fantasma RED!"));
-
         ghosts.add(red);
+        baseStrategies.put(red, createStrategyForType(red));
         allGhosts.stream()
                  .filter(g -> g != red)
-                 .forEach(cagedGhosts::add);
-
-        long now = System.currentTimeMillis();
-        nextChangeTime.put(red, now + randomInterval());
+                 .forEach(g -> {
+                     cagedGhosts.add(g);
+                     baseStrategies.put(g, createStrategyForType(g));
+                 });
     }
 
-    // Resetta lo stato dei fantasmi tra un livello e l’altro
     public void resetGhosts(List<Block> allGhosts,
                             Block newPortal,
                             List<Block> newPowerFoods) {
@@ -80,25 +73,24 @@ public class GhostManager {
         cagedGhosts.clear();
         respawningGhosts.clear();
         cageReleaseTime.clear();
-        this.ghostPortal     = newPortal;
-        ghostsAreScared      = false;
-        scaredEndTime        = 0;
-        cageTimerStarted     = false;
+        baseStrategies.clear();
+        this.ghostPortal = newPortal;
+        ghostsAreScared = false;
+        scaredEndTime = 0;
+        cageTimerStarted = false;
 
         Block red = allGhosts.stream()
             .filter(g -> g.ghostType == Block.GhostType.RED)
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Manca il fantasma RED!"));
-
         ghosts.add(red);
+        baseStrategies.put(red, createStrategyForType(red));
         allGhosts.stream()
                  .filter(g -> g != red)
-                 .forEach(cagedGhosts::add);
-
-        long now = System.currentTimeMillis();
-        nextChangeTime.clear();
-        nextChangeTime.put(red, now + randomInterval());
-        orangeChaseState.clear();
+                 .forEach(g -> {
+                     cagedGhosts.add(g);
+                     baseStrategies.put(g, createStrategyForType(g));
+                 });
     }
 
     // Avvia i timer per liberare progressivamente i fantasmi dalla gabbia
@@ -108,15 +100,15 @@ public class GhostManager {
         long zero = System.currentTimeMillis();
         for (Block g : cagedGhosts) {
             long delay = switch (g.ghostType) {
-                case BLUE   -> BLUE_DELAY_MS;
+                case BLUE -> BLUE_DELAY_MS;
                 case ORANGE -> ORANGE_DELAY_MS;
-                case PINK   -> PINK_DELAY_MS;
-                default     -> 0L;
+                case PINK -> PINK_DELAY_MS;
+                default -> 0L;
             };
             cageReleaseTime.put(g, zero + delay);
         }
     }
-    
+
     // Disegna i fantasmi, gestendo l’effetto “spaventato” e il blinking
     public void draw(GraphicsContext gc) {
         long timeLeft = Math.max(0, scaredEndTime - System.currentTimeMillis());
@@ -143,14 +135,12 @@ public class GhostManager {
         }
     }
 
-    
-    // Attiva la modalità spaventato per tutti i fantasmi per un tempo definito
+    // Attiva la modalità spaventato per tutti i fantasmi
     public void activateScaredMode() {
         ghostsAreScared = true;
-        scaredEndTime   = System.currentTimeMillis() + SCARED_DURATION_MS;
-        for (Block g : ghosts)    g.isScared = true;
+        scaredEndTime = System.currentTimeMillis() + SCARED_DURATION_MS;
+        for (Block g : ghosts) g.isScared = true;
         for (Block g : cagedGhosts) g.isScared = true;
-
         SoundManager.loopSound("siren_ghost");
     }
 
@@ -159,11 +149,11 @@ public class GhostManager {
             ghostsAreScared = false;
             for (Block g : ghosts) {
                 g.isScared = false;
-                g.image    = g.originalImage;
+                g.image = g.originalImage;
             }
             for (Block g : cagedGhosts) {
                 g.isScared = false;
-                g.image    = g.originalImage;
+                g.image = g.originalImage;
             }
             SoundManager.stopSound("siren_ghost");
         }
@@ -199,9 +189,8 @@ public class GhostManager {
     private void scheduleGhostRespawn(Block g) {
         g.isScared = false;
         g.image = g.originalImage;
-        g.image     = g.isScared ? scaredGhostImage : g.originalImage;
-        g.x = ghostPortal.x + (ghostPortal.width  - g.width)  / 2;
-        g.y = ghostPortal.y + (ghostPortal.height - g.height) / 2;        
+        g.x = ghostPortal.x + (ghostPortal.width - g.width) / 2;
+        g.y = ghostPortal.y + (ghostPortal.height - g.height) / 2;
         g.direction = Direction.UP;
         g.isExiting = true;
         respawningGhosts.add(new RespawnGhost(g, System.currentTimeMillis() + 1000));
@@ -213,7 +202,6 @@ public class GhostManager {
             RespawnGhost rg = it.next();
             if (now >= rg.respawnTime) {
                 ghosts.add(rg.ghost);
-                nextChangeTime.put(rg.ghost, now + randomInterval());
                 it.remove();
             }
         }
@@ -228,18 +216,17 @@ public class GhostManager {
             Long releaseAt = cageReleaseTime.get(g);
             if (releaseAt != null && now >= releaseAt) {
                 it.remove();
-                g.x = ghostPortal.x + (ghostPortal.width  - g.width)  / 2;
+                g.x = ghostPortal.x + (ghostPortal.width - g.width) / 2;
                 g.y = ghostPortal.y + (ghostPortal.height - g.height) / 2;
                 g.isExiting = true;
                 g.direction = Direction.UP;
                 g.isScared = ghostsAreScared;
-                g.image    = g.isScared ? scaredGhostImage : g.originalImage;
+                g.image = g.isScared ? scaredGhostImage : g.originalImage;
                 ghosts.add(g);
-                nextChangeTime.put(g, now + randomInterval());
             }
         }
     }
-    
+
     public void moveGhosts() {
         long now = System.currentTimeMillis();
         if (frozen && now < frozenEndTime) return;
@@ -251,123 +238,62 @@ public class GhostManager {
 
         ghosts.sort(Comparator.comparingInt(g -> g.ghostType.ordinal()));
 
-        // Fase globale per Orange: 5s chase, 5s random
-        boolean chasePhase = ((now / ORANGE_PHASE_MS) % 2) == 1;
-
         for (Block g : ghosts) {
             if (g.isExiting) {
-                // Uscita dalla gabbia
-                g.y -= ghostSPEED;
+                // Uscita dalla gabbia: sempre verso l'alto
+                g.y -= AbstractGhostStrategy.GHOST_SPEED;
                 if (g.y + g.height < ghostPortal.y) {
                     g.isExiting = false;
-                    g.image      = g.originalImage;
-                    g.direction  = randomAvailable(g);
+                    g.image = g.originalImage;
+                    g.direction = g.direction; // mantiene la direzione
                 }
                 handleWrap(g);
                 continue;
             }
 
-            Direction next;
-
+            GhostMovementStrategy strategy;
             if (g.isScared) {
-                // Fantasma spaventato: comportamento casuale con timer
-                next = timedRandom(g, now);
-
+                strategy = scaredStrategy;
             } else {
-                switch (g.ghostType) {
-                    case RED:
-                    case BLUE:
-                        // Esplorazione casuale
-                        next = timedRandom(g, now);
-                        break;
-
-                    case ORANGE:
-                        // Orange alterna chase/random ogni 5s,
-                        // ricalcola la direzione solo quando la sotto‐fase cambia.
-                        Boolean last = orangeChaseState.get(g);
-                        if (last == null || last != chasePhase) {
-                            next = chasePhase
-                                ? chase(g)
-                                : randomAvailable(g);
-                            orangeChaseState.put(g, chasePhase);
-                        } else {
-                            next = g.direction;
-                        }
-                        break;
-
-                   case PINK:
-                        long pinkPhaseTime = now % PINK_PHASE_MS;
-                        if (pinkPhaseTime < 6000) {  // Primi 6 secondi: modalità predittiva
-                            next = bestAvailableDirection(g, predictedPacmanTarget());
-                        } else {  
-                            next = timedRandom(g, now);
-                        }
-                        break;
-                    default:
-                        next = timedRandom(g, now);
-                }
+                strategy = baseStrategies.get(g);
             }
-
+            Direction next = strategy.getNextDirection(g, now);
             moveAlong(g, next);
             handleWrap(g);
         }
     }
 
-    private Point predictedPacmanTarget() {
-        Block pac = game.getPacmanBlock();
-        Direction pd = game.getPacmanDirection();
-        return new Point(
-            pac.x + pd.dx * PINK_PREDICT_TILES * PacMan.TILE_SIZE,
-            pac.y + pd.dy * PINK_PREDICT_TILES * PacMan.TILE_SIZE
-        );
-    }
-
-    
-  /* Tenta di muovere il fantasma di un passo in `d`. Se è bloccato, ne sceglie subito
-     un altro tra `availableDirections(g)`. Aggiorna sempre `g.direction` */
-   private void moveAlong(Block g, Direction d) {
-        // Calcola posizione “raw” se muovessi in d
-        int nx = g.x + d.dx * ghostSPEED;
-        int ny = g.y + d.dy * ghostSPEED;
-
-        // Verifica collisione in quella posizione
+    private void moveAlong(Block g, Direction d) {
+        int nx = g.x + d.dx * AbstractGhostStrategy.GHOST_SPEED;
+        int ny = g.y + d.dy * AbstractGhostStrategy.GHOST_SPEED;
         boolean free = !collidesWithWall(nx, ny);
-
-     /* Solo quando sono esattamente su confini di cella (multipli di TILE_SIZE)
-        posso cambiare direzione; altrimenti proseguo nella dir attuale*/
         boolean onGridX = (g.x % PacMan.TILE_SIZE) == 0;
         boolean onGridY = (g.y % PacMan.TILE_SIZE) == 0;
         if (!(onGridX && onGridY)) {
-            // non sono centrato: continuo nella direzione corrente se possibile
             Direction cur = g.direction;
-            int cx = g.x + cur.dx * ghostSPEED;
-            int cy = g.y + cur.dy * ghostSPEED;
+            int cx = g.x + cur.dx * AbstractGhostStrategy.GHOST_SPEED;
+            int cy = g.y + cur.dy * AbstractGhostStrategy.GHOST_SPEED;
             if (!collidesWithWall(cx, cy)) {
                 g.x = cx;
                 g.y = cy;
                 return;
             }
-            // se pure la direzione corrente è bloccata, cadremo più sotto a scegliere un'alternativa
         }
-
-        // Se sono centrato o direzione sbagliata, e d è libero, uso d
         if (free) {
             g.x = nx;
             g.y = ny;
             g.direction = d;
             return;
         }
-
-        // Collisione: cerco subito tra le libere
         List<Direction> freeDirs = availableDirections(g);
         if (!freeDirs.isEmpty()) {
-            Direction alt = freeDirs.get(rand.nextInt(freeDirs.size()));
-            g.x += alt.dx * ghostSPEED;
-            g.y += alt.dy * ghostSPEED;
+            Direction alt = freeDirs.get(new Random().nextInt(freeDirs.size()));
+            g.x += alt.dx * AbstractGhostStrategy.GHOST_SPEED;
+            g.y += alt.dy * AbstractGhostStrategy.GHOST_SPEED;
             g.direction = alt;
         }
     }
-    
+
     private void handleWrap(Block g) {
         if (isOnTunnel(g)) {
             if (!ghostsInTunnel.contains(g)) {
@@ -379,74 +305,49 @@ public class GhostManager {
         }
     }
 
-    private static class Point {
-        final int x, y;
-        Point(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    private Direction timedRandom(Block g, long now) {
-        Long t = nextChangeTime.getOrDefault(g, 0L);
-        if (now >= t) {
-            Direction d = randomAvailable(g);
-            nextChangeTime.put(g, now + randomInterval());
-            return d;
-        }
-        return g.direction;
-    }
-
-    private Direction chase(Block g) {
-        Block pac = game.getPacmanBlock();
-        Point target = new Point(pac.x, pac.y);
-        return bestAvailableDirection(g, target);
-    }
-
-    private Direction bestAvailableDirection(Block g, Point target) {
-        double bestDist = Double.MAX_VALUE;
-        Direction best = g.direction; // fallback
-        for (Direction d : availableDirections(g)) {
-            double nx = g.x + d.dx * ghostSPEED;
-            double ny = g.y + d.dy * ghostSPEED;
-            double dist = hypot(nx - target.x, ny - target.y);
-            if (dist < bestDist) {
-                bestDist = dist;
-                best = d;
-            }
-        }
-        return best;
-    }
-    
     private boolean collidesWithWall(int x, int y) {
         Block test = new Block(null, x, y, PacMan.TILE_SIZE, PacMan.TILE_SIZE, null);
         return map.isCollisionWithWallOrPortal(test);
     }
 
-    private static double hypot(double dx, double dy) {
-        return Math.hypot(dx, dy);
-    }
-
-    private static class RespawnGhost {
-        final Block ghost;
-        final long  respawnTime;
-        RespawnGhost(Block g, long t) { ghost = g; respawnTime = t; }
-    }
-
     private List<Direction> availableDirections(Block g) {
         List<Direction> ok = new ArrayList<>();
         for (Direction d : Direction.values()) {
-            int nx = g.x + d.dx * ghostSPEED;
-            int ny = g.y + d.dy * ghostSPEED;
+            int nx = g.x + d.dx * AbstractGhostStrategy.GHOST_SPEED;
+            int ny = g.y + d.dy * AbstractGhostStrategy.GHOST_SPEED;
             if (!collidesWithWall(nx, ny)) ok.add(d);
         }
         return ok;
     }
 
-    private Direction randomAvailable(Block g) {
-        List<Direction> ok = availableDirections(g);
-        if (ok.isEmpty()) return g.direction;
-        return ok.get(rand.nextInt(ok.size()));
+    // Congela i fantasmi per un certo intervallo
+    public void freeze(long durationMs) {
+        frozen = true;
+        frozenEndTime = System.currentTimeMillis() + durationMs;
+    }
+    public void unfreeze() {
+        frozen = false;
+    }
+
+    private static class RespawnGhost {
+        final Block ghost;
+        final long respawnTime;
+        RespawnGhost(Block g, long t) { ghost = g; respawnTime = t; }
+    }
+
+    private GhostMovementStrategy createStrategyForType(Block g) {
+        switch (g.ghostType) {
+            case RED:
+                return new RedGhostStrategy(map, game);
+            case BLUE:
+                return new BlueGhostStrategy(map, game);
+            case ORANGE:
+                return new OrangeGhostStrategy(map, game);
+            case PINK:
+                return new PinkGhostStrategy(map, game);
+            default:
+                return new RedGhostStrategy(map, game);
+        }
     }
 
     private boolean isOnTunnel(Block g) {
@@ -459,15 +360,5 @@ public class GhostManager {
             }
         }
         return false;
-    }
-
-    // Congela i fantasmi per un certo intervallo
-    public void freeze(long durationMs) {
-        frozen = true;
-        frozenEndTime = System.currentTimeMillis() + durationMs;
-    }
-    // unfreeze dei fantasmi
-    public void unfreeze() {
-        frozen = false;
     }
 }

@@ -1,4 +1,3 @@
-// File: src/main/java/com/strategy/MovementStrategy.java
 package com.strategy;
 
 import com.pacman.Block;
