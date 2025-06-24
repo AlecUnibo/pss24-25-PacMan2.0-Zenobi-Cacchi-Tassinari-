@@ -142,7 +142,7 @@ public class PacMan extends Pane {
     setOnKeyPressed(e -> {
         KeyCode code = e.getCode();
 
-        if (waitingForStartSound || waitingForDeathSound) {
+        if (waitingForStartSound || waitingForDeathSound || flashing) {
             return;
         }
         // START iniziale
