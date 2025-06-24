@@ -19,9 +19,10 @@ public class FruitManager {
     private long remainingDelay;
     private long lastPhaseStart;
     private static final int MAX_FRUITS_PER_LEVEL  = 2;
+    private int spawnCount = 0;
     private static final int FRUIT_VISIBLE_MS      = 8000;
-    private static final int FIRST_DELAY_MS        = 10000;
-    private static final int SECOND_DELAY_MS       = 10000;
+    private static final int FIRST_DELAY_MS        = 5000;
+    private static final int SECOND_DELAY_MS       = 5000;
 
     public FruitManager(PacMan game, ImageLoader loader) {
         this.game = game;
@@ -99,13 +100,14 @@ public class FruitManager {
     
     // Genera un nuovo frutto al centro della mappa, finché non si supera il numero massimo
     private void spawnFruit() {
-        if (fruits.size() >= MAX_FRUITS_PER_LEVEL) return;
+        if (spawnCount >= MAX_FRUITS_PER_LEVEL) return;
         int col = PacMan.COLUMN_COUNT / 2;
         int x = col * PacMan.TILE_SIZE;
         int y = game.getReadyRow() * PacMan.TILE_SIZE;
         int lvl = game.getCurrentLevel();
         FruitType type = FruitType.values()[(lvl - 1) % FruitType.values().length];
         fruits.add(new Fruit(x, y, type));
+        spawnCount++;
     }
 
     // Rimuove l’ultimo frutto apparso dalla lista
@@ -116,7 +118,7 @@ public class FruitManager {
     }
 
     // Gestisce la raccolta del frutto da parte di Pac-Man e attiva eventuali superpoteri
-    public int collectFruit(Block pacman) {
+    public FruitType collectFruit(Block pacman) {
         for (int i = 0; i < fruits.size(); i++) {
             Fruit f = fruits.get(i);
             if (pacman.x < f.getX() + PacMan.TILE_SIZE &&
@@ -140,10 +142,10 @@ public class FruitManager {
                     }
                 }
 
-                return f.getType().getScore();
+                return f.getType();
             }
         }
-        return 0;
+        return null;
     }
 
     // Aumenta temporaneamente la velocità di Pac-Man e la ripristina dopo 10s
@@ -172,8 +174,17 @@ public class FruitManager {
         }
     }
 
-    // Resetta tutti i frutti e i timer, terminando il thread se in esecuzione
-    public synchronized void reset() {
+    public synchronized void resetLevel() {
+        fruits.clear();
+        spawnCount = 0;
+        if (running) {
+            worker.interrupt();
+            running = false;
+        }
+        resetTimers();
+    }
+
+    public synchronized void resetAfterLifeLost() {
         fruits.clear();
         if (running) {
             worker.interrupt();
