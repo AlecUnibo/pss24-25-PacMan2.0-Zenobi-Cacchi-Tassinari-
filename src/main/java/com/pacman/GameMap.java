@@ -41,7 +41,7 @@ public class GameMap {
     private final HashSet<Block> walls      = new HashSet<>();
     private final HashSet<Block> foods      = new HashSet<>();
     private final HashSet<Block> ghosts     = new HashSet<>();
-    private final HashSet<Block> powerFoods = new HashSet<>();
+    private final List<Block> powerFoods = new ArrayList<>();
     private final List<Block>    tunnels    = new ArrayList<>();
     private Block                ghostPortal;
     private Block                pacman;
@@ -131,7 +131,20 @@ public class GameMap {
             }
         }
     }
-    
+    public Block getCollidingFoodBlock(Block pacman) {
+        for (Block food : foods) {
+            if (collision(pacman, food)) return food;
+        }
+        return null;
+    }
+
+    public Block getCollidingPowerFoodBlock(Block pacman) {
+        for (Block power : powerFoods) {
+            if (collision(pacman, power)) return power;
+        }
+        return null;
+    }
+
     // Ripristina solo posizioni di Pac-Man e fantasmi, mantenendo la mappa statica
     public void resetEntities() {
         ghosts.clear();
@@ -224,7 +237,7 @@ public class GameMap {
     public HashSet<Block> getFoods()    { return foods; }
     public List<Block>    getGhosts()   { return new ArrayList<>(ghosts); }
     public Block          getGhostPortal() { return ghostPortal; }
-    public List<Block>    getPowerFoods(){ return new ArrayList<>(powerFoods); }
+    public List<Block>    getPowerFoods(){ return powerFoods; }
     public List<Image>    getCollectedFruits(){return new ArrayList<>(collectedFruits);}
     public List<Block>    getTunnels()  { return tunnels; }
 
@@ -290,12 +303,14 @@ public class GameMap {
         while (it.hasNext()) {
             Block pf = it.next();
             if (collision(b, pf)) {
-                it.remove();
+                pf.image = null;   // ← IMPORTANTISSIMO
+                it.remove();       // ← Rimuove dalla lista logica
                 return true;
             }
         }
         return false;
     }
+
 
     public int getPowerFoodCount() { return powerFoods.size(); }
     

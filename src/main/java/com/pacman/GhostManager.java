@@ -139,8 +139,15 @@ public class GhostManager {
     public void activateScaredMode() {
         ghostsAreScared = true;
         scaredEndTime = System.currentTimeMillis() + SCARED_DURATION_MS;
-        for (Block g : ghosts) g.isScared = true;
-        for (Block g : cagedGhosts) g.isScared = true;
+        for (Block g : ghosts) {
+            g.isScared = true;
+            g.setScared(true); // <--- aggiunto
+        }
+        for (Block g : cagedGhosts) {
+            g.isScared = true;
+            g.setScared(true); // <--- aggiunto
+        }
+
         SoundManager.loopSound("siren_ghost");
     }
 
@@ -149,10 +156,12 @@ public class GhostManager {
             ghostsAreScared = false;
             for (Block g : ghosts) {
                 g.isScared = false;
+                g.setScared(false);
                 g.image = g.originalImage;
             }
             for (Block g : cagedGhosts) {
                 g.isScared = false;
+                g.setScared(false);
                 g.image = g.originalImage;
             }
             SoundManager.stopSound("siren_ghost");
@@ -186,14 +195,14 @@ public class GhostManager {
         return points;
     }
 
-    private void scheduleGhostRespawn(Block g) {
+    public void scheduleGhostRespawn(Block g) {
         g.isScared = false;
         g.image = g.originalImage;
         g.x = ghostPortal.x + (ghostPortal.width - g.width) / 2;
         g.y = ghostPortal.y + (ghostPortal.height - g.height) / 2;
         g.direction = Direction.UP;
         g.isExiting = true;
-        respawningGhosts.add(new RespawnGhost(g, System.currentTimeMillis() + 1000));
+        respawningGhosts.add(new RespawnGhost(g, System.currentTimeMillis() + 4000));
     }
 
     private void checkRespawningGhosts() {
@@ -201,11 +210,16 @@ public class GhostManager {
         for (Iterator<RespawnGhost> it = respawningGhosts.iterator(); it.hasNext();) {
             RespawnGhost rg = it.next();
             if (now >= rg.respawnTime) {
+                boolean stillScared = now < scaredEndTime;
+                rg.ghost.isScared = stillScared;
+                rg.ghost.image = stillScared ? scaredGhostImage : rg.ghost.originalImage;
+                rg.ghost.image = rg.ghost.isScared ? scaredGhostImage : rg.ghost.originalImage;
                 ghosts.add(rg.ghost);
                 it.remove();
             }
         }
     }
+
 
     private void checkCagedGhostsRelease() {
         if (!cageTimerStarted) return;
@@ -231,7 +245,7 @@ public class GhostManager {
         long now = System.currentTimeMillis();
         if (frozen && now < frozenEndTime) return;
         frozen = false;
-
+        
         updateScaredState();
         checkRespawningGhosts();
         checkCagedGhostsRelease();
@@ -262,6 +276,7 @@ public class GhostManager {
             handleWrap(g);
         }
     }
+
 
     private void moveAlong(Block g, Direction d) {
         int nx = g.x + d.dx * AbstractGhostStrategy.GHOST_SPEED;
@@ -304,6 +319,26 @@ public class GhostManager {
             ghostsInTunnel.remove(g);
         }
     }
+
+    public int handleGhostCollisionsWithStrategy(PacMan pacman, CollisionStrategy strategy, Runnable onLifeLost) {
+        int score = 0;
+        Block pacmanBlock = pacman.getPacmanBlock();  // fondamentale!
+
+        for (Block g : ghosts) {
+            if (g.isVisible() && g.collidesWith(pacmanBlock)) {
+                if (g.isScared()) {
+                    strategy.handleScaredGhostCollision(pacman, g);
+                    score += 200;
+                } else {
+                    strategy.handleGhostCollision(pacman, g);
+                    onLifeLost.run();
+                }
+            }
+        }
+
+        return score;
+    }
+
 
     private boolean collidesWithWall(int x, int y) {
         Block test = new Block(null, x, y, PacMan.TILE_SIZE, PacMan.TILE_SIZE, null);
@@ -348,6 +383,10 @@ public class GhostManager {
             default:
                 return new RedGhostStrategy(map, game);
         }
+    }
+
+    public void removeGhost(Block ghost) {
+        ghosts.remove(ghost);
     }
 
     private boolean isOnTunnel(Block g) {

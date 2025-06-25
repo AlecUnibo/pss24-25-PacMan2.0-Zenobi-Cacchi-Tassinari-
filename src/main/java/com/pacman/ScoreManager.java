@@ -13,6 +13,15 @@ public class ScoreManager {
     private final ImageLoader loader;
     private final List<Image> collectedFruits = new ArrayList<>();
     private boolean muted = false;
+    private int score = 0;
+
+    public void addScore(int amount) {
+    score += amount;
+    }
+
+    public int getScore() {
+        return score;
+    }
 
     public void toggleMute() {
         muted = !muted;

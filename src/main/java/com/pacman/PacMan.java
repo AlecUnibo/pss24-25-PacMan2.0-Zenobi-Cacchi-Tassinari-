@@ -10,10 +10,13 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import com.strategy.CollisionStrategy;
+import com.strategy.AllTypeCollisionsStrategy;
 import com.strategy.MovementStrategy;
 import com.strategy.KeyboardMovementStrategy;
 
 public class PacMan extends Pane {
+    private CollisionStrategy collisionStrategy;
     private MovementStrategy movementStrategy;
     public static final int TILE_SIZE    = 32;
     public static final int ROW_COUNT    = 22;
@@ -42,33 +45,36 @@ public class PacMan extends Pane {
                             );
 
                             // 3) raccolta cibo
-                            int foodScore = gameMap.collectFood(pacman);
-                            if (foodScore > 0) {
-                                score += foodScore;
+                            Block foodBlock = gameMap.getCollidingFoodBlock(pacman);
+                            if (foodBlock != null) {
+                                collisionStrategy.handleFoodCollision(PacMan.this, foodBlock);
                                 SoundManager.playSound("dot");
                             }
-                            if (gameMap.collectPowerFood(pacman)) {
-                                score += 50;
-                                SoundManager.playSound("fruit");
-                                ghostManager.activateScaredMode();
+
+                            Block powerFoodBlock = gameMap.getCollidingPowerFoodBlock(pacman);
+                            if (powerFoodBlock != null) {
+                                boolean wasPresent = gameMap.getPowerFoods().contains(powerFoodBlock);
+                                collisionStrategy.handlePowerFoodCollision(PacMan.this, powerFoodBlock);
+                                boolean isRemoved = !gameMap.getPowerFoods().contains(powerFoodBlock);
+                                if (wasPresent && isRemoved) {
+                                    SoundManager.playSound("fruit");
+                                }
                             }
+
 
                             // 4) raccolta frutta
-                            FruitManager.FruitType type = fruitManager.collectFruit(pacman);
+                            FruitManager.FruitType type = fruitManager.getCollidingFruit(pacman);
                             if (type != null) {
-                                int fruitPoints = type.getScore();
-                                score += fruitPoints;
+                                collisionStrategy.handleFruitCollision(PacMan.this, type);
                                 SoundManager.playSound("fruit");
-                                // Aggiungo l’immagine al ScoreManager per la visualizzazione in basso
-                                scoreManager.addCollectedFruit(type);
                             }
-
 
                             // 5) fantasmi & collisioni
                             ghostManager.moveGhosts();
-                            score += ghostManager.handleGhostCollisions(
-                                pacman, PacMan.this::loseLife
-                            );
+                            ghostManager.handleGhostCollisionsWithStrategy(PacMan.this, collisionStrategy, PacMan.this::loseLife);
+                            score = scoreManager.getScore(); // 🔥 sincronizza lo score visualizzato
+
+                            
 
                             // 6) disegno e avanzamento livello
                             draw();
@@ -134,6 +140,7 @@ public class PacMan extends Pane {
         gameMap.resetEntities();
         ghostManager.resetGhosts(gameMap.getGhosts(), gameMap.getGhostPortal(), gameMap.getPowerFoods());
         scoreManager = new ScoreManager(scoreFont, imageLoader);
+        this.collisionStrategy = new AllTypeCollisionsStrategy(ghostManager, fruitManager, scoreManager, gameMap);
         movementStrategy = new KeyboardMovementStrategy();
         pacman       = gameMap.getPacman();
 
@@ -397,6 +404,14 @@ public class PacMan extends Pane {
                 draw();  // mostro READY! finché non parte il primo input
             }
         }).start();
+    }
+    public void undoMove() {
+        // Implementazione minima
+        // Lascia anche vuoto se non vuoi gestirlo
+    }
+
+    public void die() {
+        loseLife();
     }
 
     private void proceedAfterDeathSound() {

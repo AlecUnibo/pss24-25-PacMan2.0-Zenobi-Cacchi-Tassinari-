@@ -36,7 +36,6 @@ public class FruitManager {
         lastPhaseStart = 0;
     }
 
-    // Inizia il thread che gestisce la comparsa e rimozione della frutta nei tempi stabiliti
     public synchronized void startFruitTimer() {
         if (running) return;
         running = true;
@@ -46,7 +45,6 @@ public class FruitManager {
         worker.start();
     }
 
-    // Sospende temporaneamente il timer della frutta, mantenendo lo stato del ritardo rimanente
     public synchronized void pauseFruitTimer() {
         if (!running) return;
         running = false;
@@ -55,7 +53,6 @@ public class FruitManager {
         worker.interrupt();
     }
 
-    // Loop interno del thread: alterna spawn, visibilità e rimozione dei frutti
     private void runLoop() {
         while (running && phase < 3) {
             if (phase == 0 || phase == 2) {
@@ -97,8 +94,7 @@ public class FruitManager {
             removeLastFruit();
         }
     }
-    
-    // Genera un nuovo frutto al centro della mappa, finché non si supera il numero massimo
+
     private void spawnFruit() {
         if (spawnCount >= MAX_FRUITS_PER_LEVEL) return;
         int col = PacMan.COLUMN_COUNT / 2;
@@ -110,14 +106,12 @@ public class FruitManager {
         spawnCount++;
     }
 
-    // Rimuove l’ultimo frutto apparso dalla lista
     private void removeLastFruit() {
         if (!fruits.isEmpty()) {
             fruits.remove(fruits.size() - 1);
         }
     }
 
-    // Gestisce la raccolta del frutto da parte di Pac-Man e attiva eventuali superpoteri
     public FruitType collectFruit(Block pacman) {
         for (int i = 0; i < fruits.size(); i++) {
             Fruit f = fruits.get(i);
@@ -132,23 +126,32 @@ public class FruitManager {
                     lastPhaseStart = System.currentTimeMillis();
                     if (worker != null) worker.interrupt();
                 }
-                // con 33% da un superpotere
                 if (rand.nextDouble() < 0.33) {
-                    // decide se speed o freeze (50/50)
                     if (rand.nextBoolean()) {
                         activateSpeedPower();
                     } else {
                         activateFreezePower();
                     }
                 }
-
                 return f.getType();
             }
         }
         return null;
     }
 
-    // Aumenta temporaneamente la velocità di Pac-Man e la ripristina dopo 10s
+    // Metodo per supportare la CollisionStrategy
+    public FruitType getCollidingFruit(Block pacman) {
+        for (Fruit f : fruits) {
+            if (pacman.x < f.getX() + PacMan.TILE_SIZE &&
+                pacman.x + pacman.width > f.getX() &&
+                pacman.y < f.getY() + PacMan.TILE_SIZE &&
+                pacman.y + pacman.height > f.getY()) {
+                return f.getType();
+            }
+        }
+        return null;
+    }
+
     private void activateSpeedPower() {
         game.setSpeedMultiplier(2.0);
         new Thread(() -> {
@@ -157,12 +160,10 @@ public class FruitManager {
         }, "SpeedPowerTimer").start();
     }
 
-    // Congela i fantasmi per 5s usando il metodo di PacMan.freezeGhosts()
     private void activateFreezePower() {
         game.freezeGhosts(5_000);
     }
 
-    // Disegna tutte le istanze di frutta presenti sulla mappa
     public void draw(GraphicsContext gc) {
         for (Fruit f : fruits) {
             Image img = switch (f.getType()) {
@@ -211,9 +212,13 @@ public class FruitManager {
         private final int score;
         FruitType(int s) { score = s; }
         public int getScore() { return score; }
+    }   
+
+    public void consumeFruit(FruitType type) {
+        fruits.removeIf(f -> f.getType() == type);
     }
 
-    // Sleep suddiviso in piccoli intervalli per poter gestire le pause del timer
+
     private void sleepWithPause(long duration) throws InterruptedException {
         long target = System.currentTimeMillis() + duration;
         while (running) {
