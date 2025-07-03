@@ -16,27 +16,27 @@ import java.util.Iterator;
 
 public class GameMap {
     private static final String[] tileMap = {
-        "XXXXXXXXXXXXXXXXXXX",
-        "XO       X       OX",
-        "X XX XXX X XXX XX X",
-        "X                 X",
-        "X XX X XXXXX X XX X",
-        "X    X       X    X",
-        "XXXX XXXXnXXXX XXXX",
-        "nnnX XnnnrnnnX Xnnn",
-        "XXXX XnXX-XXnX XXXX",
-        "Tnnn nnXpboXnn nnnT",
-        "XXXX XnXXXXXnX XXXX",
-        "nnnX XnREADY!X Xnnn",
-        "XXXX XnXXXXXnX XXXX",
-        "X        X        X",
-        "X XX XXX X XXX XX X",
-        "X  X     P     X  X",
-        "XX X X XXXXX X X XX",
-        "X    X   X   X    X",
-        "X XXXXXX X XXXXXX X",
-        "XO               OX",
-        "XXXXXXXXXXXXXXXXXXX"
+            "XXXXXXXXXXXXXXXXXXX",
+            "XO       X       OX",
+            "X XX XXX X XXX XX X",
+            "X                 X",
+            "X XX X XXXXX X XX X",
+            "X    X       X    X",
+            "XXXX XXXXnXXXX XXXX",
+            "nnnX XnnnrnnnX Xnnn",
+            "XXXX XnXX-XXnX XXXX",
+            "Tnnn nnXpboXnn nnnT",
+            "XXXX XnXXXXXnX XXXX",
+            "nnnX XnREADY!X Xnnn",
+            "XXXX XnXXXXXnX XXXX",
+            "X        X        X",
+            "X XX XXX X XXX XX X",
+            "X  X     P     X  X",
+            "XX X X XXXXX X X XX",
+            "X    X   X   X    X",
+            "X XXXXXX X XXXXXX X",
+            "XO               OX",
+            "XXXXXXXXXXXXXXXXXXX"
     };
     private final HashSet<Block> walls      = new HashSet<>();
     private final HashSet<Block> foods      = new HashSet<>();
@@ -49,7 +49,7 @@ public class GameMap {
     private final ImageLoader    loader;
     private boolean firstLoad = true;
 
-
+    //costruisce e carica la mappa inizial
     public GameMap(ImageLoader loader) {
         this.loader = loader;
         loadMap();
@@ -64,23 +64,23 @@ public class GameMap {
         tunnels.clear();
         collectedFruits.clear();
         ghostPortal = null;
-    
+
         for (int r = 0; r < tileMap.length; r++) {
             for (int c = 0; c < tileMap[r].length(); c++) {
                 int x = c * PacMan.TILE_SIZE;
                 int y = r * PacMan.TILE_SIZE;
                 char tile = tileMap[r].charAt(c);
-    
+
                 switch (tile) {
                     case 'X':
                         walls.add(new Block(loader.getWallImage(), x, y, PacMan.TILE_SIZE, PacMan.TILE_SIZE, null));
                         break;
                     case ' ':
                         foods.add(new Block(null,
-                            x + PacMan.TILE_SIZE/2 - 2,
-                            y + PacMan.TILE_SIZE/2 - 2,
-                            4, 4,
-                            null));
+                                x + PacMan.TILE_SIZE/2 - 2,
+                                y + PacMan.TILE_SIZE/2 - 2,
+                                4, 4,
+                                null));
                         break;
                     case 'n':
                         break;
@@ -92,38 +92,38 @@ public class GameMap {
                         break;
                     case 'O':
                         powerFoods.add(new Block(
-                            loader.getPowerFoodImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            null));
+                                loader.getPowerFoodImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                null));
                         break;
                     case 'b':
                         ghosts.add(new Block(
-                            loader.getBlueGhostImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            Block.GhostType.BLUE));
+                                loader.getBlueGhostImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                Block.GhostType.BLUE));
                         break;
                     case 'o':
                         ghosts.add(new Block(
-                            loader.getOrangeGhostImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            Block.GhostType.ORANGE));
+                                loader.getOrangeGhostImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                Block.GhostType.ORANGE));
                         break;
                     case 'p':
                         ghosts.add(new Block(
-                            loader.getPinkGhostImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            Block.GhostType.PINK));
+                                loader.getPinkGhostImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                Block.GhostType.PINK));
                         break;
                     case 'r':
                         ghosts.add(new Block(
-                            loader.getRedGhostImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            Block.GhostType.RED));
+                                loader.getRedGhostImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                Block.GhostType.RED));
                         break;
                     case 'T':
                         tunnels.add(new Block(null, x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            null));
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                null));
                         break;
                     default:
                         break;
@@ -131,6 +131,7 @@ public class GameMap {
             }
         }
     }
+
     public Block getCollidingFoodBlock(Block pacman) {
         for (Block food : foods) {
             if (collision(pacman, food)) return food;
@@ -153,34 +154,34 @@ public class GameMap {
                 int x = c * PacMan.TILE_SIZE;
                 int y = r * PacMan.TILE_SIZE;
                 char tile = tileMap[r].charAt(c);
-    
+
                 switch (tile) {
                     case 'P':
                         pacman = new Block(loader.getPacmanRightImage(), x, y, PacMan.TILE_SIZE, PacMan.TILE_SIZE, null);
                         break;
                     case 'b':
                         ghosts.add(new Block(
-                            loader.getBlueGhostImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            Block.GhostType.BLUE));
+                                loader.getBlueGhostImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                Block.GhostType.BLUE));
                         break;
                     case 'o':
                         ghosts.add(new Block(
-                            loader.getOrangeGhostImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            Block.GhostType.ORANGE));
+                                loader.getOrangeGhostImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                Block.GhostType.ORANGE));
                         break;
                     case 'p':
                         ghosts.add(new Block(
-                            loader.getPinkGhostImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            Block.GhostType.PINK));
+                                loader.getPinkGhostImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                Block.GhostType.PINK));
                         break;
                     case 'r':
                         ghosts.add(new Block(
-                            loader.getRedGhostImage(), x, y,
-                            PacMan.TILE_SIZE, PacMan.TILE_SIZE,
-                            Block.GhostType.RED));
+                                loader.getRedGhostImage(), x, y,
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE,
+                                Block.GhostType.RED));
                         break;
                     default:
                         break;
@@ -196,7 +197,7 @@ public class GameMap {
         for (Block w : walls) {
             if (w.image != null)
                 gc.drawImage(w.image, w.x, w.y,
-                             PacMan.TILE_SIZE, PacMan.TILE_SIZE);
+                        PacMan.TILE_SIZE, PacMan.TILE_SIZE);
         }
         gc.setFill(Color.WHITE);
         for (Block f : foods) {
@@ -204,13 +205,13 @@ public class GameMap {
         }
         for (Block pf : powerFoods) {
             gc.drawImage(pf.image, pf.x, pf.y,
-                         PacMan.TILE_SIZE, PacMan.TILE_SIZE);
+                    PacMan.TILE_SIZE, PacMan.TILE_SIZE);
         }
 
         if (firstLoad) {
             String msg = "READY!";
             Font   f   = Font.font("PressStart2P",
-                           FontWeight.BOLD, PacMan.TILE_SIZE);
+                    FontWeight.BOLD, PacMan.TILE_SIZE);
             gc.setFont(f);
             gc.setFill(Color.YELLOW);
 
@@ -258,9 +259,9 @@ public class GameMap {
 
     private boolean collision(Block a, Block c) {
         return a.x < c.x + c.width &&
-               a.x + a.width > c.x &&
-               a.y < c.y + c.height &&
-               a.y + a.height > c.y;
+                a.x + a.width > c.x &&
+                a.y < c.y + c.height &&
+                a.y + a.height > c.y;
     }
 
     // Verifica collisione con muro o portale
@@ -313,7 +314,7 @@ public class GameMap {
 
 
     public int getPowerFoodCount() { return powerFoods.size(); }
-    
+
     // Chiama il callback una volta che tutte le pareti sono state temporaneamente "spente"
     public void flashWalls(Runnable onFinished) {
         walls.forEach(w->w.image=null);
@@ -364,7 +365,7 @@ public class GameMap {
                     int freeDirs = 0;
                     for (Direction d : Direction.values()) {
                         Block nb = new Block(null, x + d.dx*PacMan.TILE_SIZE, y + d.dy*PacMan.TILE_SIZE,
-                                             PacMan.TILE_SIZE, PacMan.TILE_SIZE, null);
+                                PacMan.TILE_SIZE, PacMan.TILE_SIZE, null);
                         if (!isCollisionWithWallOrPortal(nb)) freeDirs++;
                     }
                     if (freeDirs != 2 || isOnTunnel(b) || r==11) {
@@ -394,7 +395,7 @@ public class GameMap {
         }
         return graph;
     }
-    
+
     /**
      * Verifica se un blocco si trova dentro un tunnel (per considerarlo nodo di pathfinding).
      */

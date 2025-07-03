@@ -26,65 +26,65 @@ public class PacMan extends Pane {
     private boolean started = false;
     private final GraphicsContext gc;
     private final AnimationTimer gameLoop = new AnimationTimer() {
-            @Override
-                    public void handle(long now) {
-                        if (!gameOver && !flashing) {
-                            // 1) input buffering (prima dei movimenti)
-                            if (storedDirection != null &&
-                                gameMap.canMove(pacman, storedDirection)) {
-                                currentDirection = storedDirection;
-                                storedDirection  = null;
-                            }
+        @Override
+        public void handle(long now) {
+            if (!gameOver && !flashing) {
+                // 1) input buffering (prima dei movimenti)
+                if (storedDirection != null &&
+                        gameMap.canMove(pacman, storedDirection)) {
+                    currentDirection = storedDirection;
+                    storedDirection  = null;
+                }
 
-                            // 2) DELEGA SPAZIO + animazione bocca + tunnel
-                            movementStrategy.move(
-                                pacman,
-                                currentDirection,
-                                gameMap,
-                                speedMultiplier
-                            );
+                // 2) DELEGA SPAZIO + animazione bocca + tunnel
+                movementStrategy.move(
+                        pacman,
+                        currentDirection,
+                        gameMap,
+                        speedMultiplier
+                );
 
-                            // 3) raccolta cibo
-                            Block foodBlock = gameMap.getCollidingFoodBlock(pacman);
-                            if (foodBlock != null) {
-                                collisionStrategy.handleFoodCollision(PacMan.this, foodBlock);
-                                SoundManager.playSound("dot");
-                            }
+                // 3) raccolta cibo
+                Block foodBlock = gameMap.getCollidingFoodBlock(pacman);
+                if (foodBlock != null) {
+                    collisionStrategy.handleFoodCollision(PacMan.this, foodBlock);
+                    SoundManager.playSound("dot");
+                }
 
-                            Block powerFoodBlock = gameMap.getCollidingPowerFoodBlock(pacman);
-                            if (powerFoodBlock != null) {
-                                boolean wasPresent = gameMap.getPowerFoods().contains(powerFoodBlock);
-                                collisionStrategy.handlePowerFoodCollision(PacMan.this, powerFoodBlock);
-                                boolean isRemoved = !gameMap.getPowerFoods().contains(powerFoodBlock);
-                                if (wasPresent && isRemoved) {
-                                    SoundManager.playSound("fruit");
-                                }
-                            }
-
-
-                            // 4) raccolta frutta
-                            FruitManager.FruitType type = fruitManager.getCollidingFruit(pacman);
-                            if (type != null) {
-                                collisionStrategy.handleFruitCollision(PacMan.this, type);
-                                SoundManager.playSound("fruit");
-                            }
-
-                            // 5) fantasmi & collisioni
-                            ghostManager.moveGhosts();
-                            ghostManager.handleGhostCollisionsWithStrategy(PacMan.this, collisionStrategy, PacMan.this::loseLife);
-                            score = scoreManager.getScore(); // 🔥 sincronizza lo score visualizzato
-
-                            
-
-                            // 6) disegno e avanzamento livello
-                            draw();
-                            if (gameMap.getFoods().isEmpty() &&
-                                gameMap.getPowerFoodCount() == 0) {
-                                nextLevel();
-                            }
-                        }
+                Block powerFoodBlock = gameMap.getCollidingPowerFoodBlock(pacman);
+                if (powerFoodBlock != null) {
+                    boolean wasPresent = gameMap.getPowerFoods().contains(powerFoodBlock);
+                    collisionStrategy.handlePowerFoodCollision(PacMan.this, powerFoodBlock);
+                    boolean isRemoved = !gameMap.getPowerFoods().contains(powerFoodBlock);
+                    if (wasPresent && isRemoved) {
+                        SoundManager.playSound("fruit");
                     }
-                };
+                }
+
+
+                // 4) raccolta frutta
+                FruitManager.FruitType type = fruitManager.collectFruit(pacman);
+                if (type != null) {
+                    collisionStrategy.handleFruitCollision(PacMan.this, type);
+                    SoundManager.playSound("fruit");
+                }
+
+                // 5) fantasmi & collisioni
+                ghostManager.moveGhosts();
+                ghostManager.handleGhostCollisionsWithStrategy(PacMan.this, collisionStrategy, PacMan.this::loseLife);
+                score = scoreManager.getScore(); // 🔥 sincronizza lo score visualizzato
+
+
+
+                // 6) disegno e avanzamento livello
+                draw();
+                if (gameMap.getFoods().isEmpty() &&
+                        gameMap.getPowerFoodCount() == 0) {
+                    nextLevel();
+                }
+            }
+        }
+    };
     private Block pacman;
     private int   score  = 0;
     private int   lives  = 3;
@@ -129,12 +129,12 @@ public class PacMan extends Pane {
         gameMap      = new GameMap(imageLoader);
         fruitManager = new FruitManager(this, imageLoader);
         ghostManager = new GhostManager(
-            gameMap.getGhosts(),
-            gameMap.getGhostPortal(),
-            gameMap.getPowerFoods(),
-            gameMap,
-            this,
-            soundManager
+                gameMap.getGhosts(),
+                gameMap.getGhostPortal(),
+                gameMap.getPowerFoods(),
+                gameMap,
+                this,
+                soundManager
         );
 
         gameMap.resetEntities();
@@ -146,76 +146,76 @@ public class PacMan extends Pane {
 
         setFocusTraversable(true);
 
-    setOnKeyPressed(e -> {
-        KeyCode code = e.getCode();
+        setOnKeyPressed(e -> {
+            KeyCode code = e.getCode();
 
-        if (waitingForStartSound || waitingForDeathSound || flashing) {
-            return;
-        }
-        // START iniziale
-        if (!started) {
-            if (keyToDir(code) != null) {
+            if (waitingForStartSound || waitingForDeathSound || flashing) {
+                return;
+            }
+            // START iniziale
+            if (!started) {
+                if (keyToDir(code) != null) {
+                    started = true;
+                    gameMap.setFirstLoad(false);
+                    currentDirection = code;
+                    applyImage(currentDirection);
+                    fruitManager.startFruitTimer();
+                    ghostManager.startCageTimers();
+                    startGameLoop();
+                }
+                return;
+            }
+
+            // RIPRESA dopo vita persa
+            if (waitingForLifeKey) {
+                if (keyToDir(code) == null) return;
+                waitingForLifeKey = false;
                 started = true;
-                gameMap.setFirstLoad(false);
                 currentDirection = code;
                 applyImage(currentDirection);
                 fruitManager.startFruitTimer();
                 ghostManager.startCageTimers();
                 startGameLoop();
+                return;
             }
-            return;
-        }
 
-        // RIPRESA dopo vita persa
-        if (waitingForLifeKey) {
-            if (keyToDir(code) == null) return;
-            waitingForLifeKey = false;
-            started = true;
-            currentDirection = code;
-            applyImage(currentDirection);
-            fruitManager.startFruitTimer();
-            ghostManager.startCageTimers();
-            startGameLoop();
-            return;
-        }
+            // RIPRESA dopo flashWalls / cambio livello
+            if (waitingForRestart) {
+                if (keyToDir(code) == null) return;
+                waitingForRestart = false;
+                started = true;
+                currentDirection = code;
+                applyImage(currentDirection);
+                fruitManager.startFruitTimer();
+                ghostManager.startCageTimers();
+                startGameLoop();
+                return;
+            }
 
-        // RIPRESA dopo flashWalls / cambio livello
-        if (waitingForRestart) {
-            if (keyToDir(code) == null) return;
-            waitingForRestart = false;
-            started = true;
-            currentDirection = code;
-            applyImage(currentDirection);
-            fruitManager.startFruitTimer();
-            ghostManager.startCageTimers();
-            startGameLoop();
-            return;
-        }
+            if (waitingForRestart) {
+                if (keyToDir(code) == null) return;
+                waitingForRestart = false;
+                started = true;
+                currentDirection = code;
+                applyImage(currentDirection);
+                // Ora che l'utente ha premuto la prima freccia:
+                fruitManager.startFruitTimer();
+                ghostManager.startCageTimers();
+                gameLoop.start();
+                return;
+            }
 
-        if (waitingForRestart) {
-            if (keyToDir(code) == null) return;
-            waitingForRestart = false;
-            started = true;
-            currentDirection = code;
-            applyImage(currentDirection);
-            // Ora che l'utente ha premuto la prima freccia:
-            fruitManager.startFruitTimer();
-            ghostManager.startCageTimers();
-            gameLoop.start();
-            return;
-        }
+            // GAME OVER -> menu
+            if (gameOver) {
+                mainMenu.returnToMenu();
+                return;
+            }
 
-        // GAME OVER -> menu
-        if (gameOver) {
-            mainMenu.returnToMenu();
-            return;
-        }
-
-        // GIOCO ATTIVO: bufferizzo
-        if (keyToDir(code) != null) {
-            storedDirection = code;
-        }
-    });
+            // GIOCO ATTIVO: bufferizzo
+            if (keyToDir(code) != null) {
+                storedDirection = code;
+            }
+        });
 
         draw();
 
@@ -241,7 +241,7 @@ public class PacMan extends Pane {
             double iconY    = BOARD_HEIGHT + TILE_SIZE - iconSize - 5;
 
             if (mouseX >= iconX && mouseX <= iconX + iconSize &&
-                mouseY >= iconY && mouseY <= iconY + iconSize) {
+                    mouseY >= iconY && mouseY <= iconY + iconSize) {
                 scoreManager.toggleMute();
                 if (scoreManager.isMuted()) {
                     SoundManager.muteAll();
@@ -254,7 +254,7 @@ public class PacMan extends Pane {
     }
 
     // Crea e avvia il ciclo principale del gioco (chiamato ogni frame).
-    private void startGameLoop() {   
+    private void startGameLoop() {
         gameLoop.start();
     }
 
@@ -285,7 +285,7 @@ public class PacMan extends Pane {
         }
         return Direction.randomDirection();
     }
-    // Disegna tutti gli elementi grafici   
+    // Disegna tutti gli elementi grafici
     private void draw() {
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT + TILE_SIZE);
@@ -319,12 +319,12 @@ public class PacMan extends Pane {
         t.setFont(font);
         return t.getLayoutBounds().getWidth();
     }
-    /* Gestisce la perdita di una vita: blocca il gioco, riproduce suono death, imposta lo stato per 
+    /* Gestisce la perdita di una vita: blocca il gioco, riproduce suono death, imposta lo stato per
        continuare o terminare.*/
     private void loseLife() {
         SoundManager.stopSound("siren_ghost");
         gameLoop.stop();
-        speedMultiplier = 1.0;  // reset moltiplicatore
+        speedMultiplier = 1.0;
         ghostManager.unfreeze();
         fruitManager.pauseFruitTimer();
         currentDirection = null;
@@ -359,7 +359,7 @@ public class PacMan extends Pane {
     private void nextLevel() {
         SoundManager.stopSound("siren_ghost");
         ghostManager.unfreeze();            // fermo ogni freeze residuo
-        speedMultiplier = 1.0;              // reset moltiplicatore
+        speedMultiplier = 1.0;
         level++;
         if (level % 3 == 1 && lives < 3) lives++;
         flashing = true;
@@ -395,19 +395,15 @@ public class PacMan extends Pane {
                 gameMap.resetEntities();
                 pacman = gameMap.getPacman();
                 ghostManager.resetGhosts(
-                    gameMap.getGhosts(),
-                    gameMap.getGhostPortal(),
-                    gameMap.getPowerFoods()
+                        gameMap.getGhosts(),
+                        gameMap.getGhostPortal(),
+                        gameMap.getPowerFoods()
                 );
                 // Aspetto il primo input per far ripartire il gioco
                 waitingForRestart = true;
                 draw();  // mostro READY! finché non parte il primo input
             }
         }).start();
-    }
-    public void undoMove() {
-        // Implementazione minima
-        // Lascia anche vuoto se non vuoi gestirlo
     }
 
     public void die() {
@@ -428,9 +424,9 @@ public class PacMan extends Pane {
         gameMap.resetEntities();
         pacman = gameMap.getPacman();
         ghostManager.resetGhosts(
-            gameMap.getGhosts(),
-            gameMap.getGhostPortal(),
-            gameMap.getPowerFoods()
+                gameMap.getGhosts(),
+                gameMap.getGhostPortal(),
+                gameMap.getPowerFoods()
         );
         ghostManager.startCageTimers();
         fruitManager.resetAfterLifeLost();
@@ -438,5 +434,4 @@ public class PacMan extends Pane {
         waitingForLifeKey = false;
         draw();
     }
-
 }

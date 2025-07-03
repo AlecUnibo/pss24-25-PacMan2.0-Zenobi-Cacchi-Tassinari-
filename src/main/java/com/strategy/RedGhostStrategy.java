@@ -5,10 +5,9 @@ import com.pacman.Direction;
 import com.pacman.GameMap;
 import com.pacman.PacMan;
 
-/**
- * Strategia per il fantasma RED: esplorazione casuale via timer.
- */
 public class RedGhostStrategy extends AbstractGhostStrategy {
+
+    /** La strategia del fantasma rosso muove in direzione casuale a intervalli.*/
     public RedGhostStrategy(GameMap map, PacMan game) {
         super(map, game);
     }

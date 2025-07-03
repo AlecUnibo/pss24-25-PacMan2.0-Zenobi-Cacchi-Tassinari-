@@ -5,10 +5,9 @@ import com.pacman.Direction;
 import com.pacman.GameMap;
 import com.pacman.PacMan;
 
-/**
- * Strategia per il fantasma PINK: primi 6s modalità predittiva, poi random.
- */
 public class PinkGhostStrategy extends AbstractGhostStrategy {
+
+    /** Usa previsione delle mosse di Pac-Man nei primi 6s, poi movimento casuale per 4s.*/
     public PinkGhostStrategy(GameMap map, PacMan game) {
         super(map, game);
     }

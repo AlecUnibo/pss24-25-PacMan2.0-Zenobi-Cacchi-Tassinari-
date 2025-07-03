@@ -53,17 +53,17 @@ public class GhostManager {
 
         // Inizializza fantasmi: RED parte subito, altri in gabbia
         Block red = allGhosts.stream()
-            .filter(g -> g.ghostType == Block.GhostType.RED)
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Manca il fantasma RED!"));
+                .filter(g -> g.ghostType == Block.GhostType.RED)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Manca il fantasma RED!"));
         ghosts.add(red);
         baseStrategies.put(red, createStrategyForType(red));
         allGhosts.stream()
-                 .filter(g -> g != red)
-                 .forEach(g -> {
-                     cagedGhosts.add(g);
-                     baseStrategies.put(g, createStrategyForType(g));
-                 });
+                .filter(g -> g != red)
+                .forEach(g -> {
+                    cagedGhosts.add(g);
+                    baseStrategies.put(g, createStrategyForType(g));
+                });
     }
 
     public void resetGhosts(List<Block> allGhosts,
@@ -80,17 +80,17 @@ public class GhostManager {
         cageTimerStarted = false;
 
         Block red = allGhosts.stream()
-            .filter(g -> g.ghostType == Block.GhostType.RED)
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Manca il fantasma RED!"));
+                .filter(g -> g.ghostType == Block.GhostType.RED)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Manca il fantasma RED!"));
         ghosts.add(red);
         baseStrategies.put(red, createStrategyForType(red));
         allGhosts.stream()
-                 .filter(g -> g != red)
-                 .forEach(g -> {
-                     cagedGhosts.add(g);
-                     baseStrategies.put(g, createStrategyForType(g));
-                 });
+                .filter(g -> g != red)
+                .forEach(g -> {
+                    cagedGhosts.add(g);
+                    baseStrategies.put(g, createStrategyForType(g));
+                });
     }
 
     // Avvia i timer per liberare progressivamente i fantasmi dalla gabbia
@@ -129,8 +129,8 @@ public class GhostManager {
             gc.setStroke(Color.WHITE);
             gc.setLineWidth(4);
             gc.strokeLine(
-                ghostPortal.x, ghostPortal.y + 2,
-                ghostPortal.x + PacMan.TILE_SIZE, ghostPortal.y + 2
+                    ghostPortal.x, ghostPortal.y + 2,
+                    ghostPortal.x + PacMan.TILE_SIZE, ghostPortal.y + 2
             );
         }
     }
@@ -175,9 +175,9 @@ public class GhostManager {
         List<Block> eaten = new ArrayList<>();
         for (Block g : ghosts) {
             boolean collided = pacman.x < g.x + g.width &&
-                               pacman.x + pacman.width > g.x &&
-                               pacman.y < g.y + g.height &&
-                               pacman.y + pacman.height > g.y;
+                    pacman.x + pacman.width > g.x &&
+                    pacman.y < g.y + g.height &&
+                    pacman.y + pacman.height > g.y;
             if (!collided) continue;
             if (g.isScared) {
                 points += 200;
@@ -202,7 +202,7 @@ public class GhostManager {
         g.y = ghostPortal.y + (ghostPortal.height - g.height) / 2;
         g.direction = Direction.UP;
         g.isExiting = true;
-        respawningGhosts.add(new RespawnGhost(g, System.currentTimeMillis() + 4000));
+        respawningGhosts.add(new RespawnGhost(g, System.currentTimeMillis() + 1000));
     }
 
     private void checkRespawningGhosts() {
@@ -210,10 +210,8 @@ public class GhostManager {
         for (Iterator<RespawnGhost> it = respawningGhosts.iterator(); it.hasNext();) {
             RespawnGhost rg = it.next();
             if (now >= rg.respawnTime) {
-                boolean stillScared = now < scaredEndTime;
-                rg.ghost.isScared = stillScared;
-                rg.ghost.image = stillScared ? scaredGhostImage : rg.ghost.originalImage;
-                rg.ghost.image = rg.ghost.isScared ? scaredGhostImage : rg.ghost.originalImage;
+                rg.ghost.isScared = false;
+                rg.ghost.image    = rg.ghost.originalImage;
                 ghosts.add(rg.ghost);
                 it.remove();
             }
@@ -245,7 +243,7 @@ public class GhostManager {
         long now = System.currentTimeMillis();
         if (frozen && now < frozenEndTime) return;
         frozen = false;
-        
+
         updateScaredState();
         checkRespawningGhosts();
         checkCagedGhostsRelease();
@@ -331,7 +329,6 @@ public class GhostManager {
                     score += 200;
                 } else {
                     strategy.handleGhostCollision(pacman, g);
-                    onLifeLost.run();
                 }
             }
         }
@@ -392,9 +389,9 @@ public class GhostManager {
     private boolean isOnTunnel(Block g) {
         for (Block t : map.getTunnels()) {
             if (g.x < t.x + t.width &&
-                g.x + g.width > t.x &&
-                g.y < t.y + t.height &&
-                g.y + g.height > t.y) {
+                    g.x + g.width > t.x &&
+                    g.y < t.y + t.height &&
+                    g.y + g.height > t.y) {
                 return true;
             }
         }

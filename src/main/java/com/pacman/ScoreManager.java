@@ -16,7 +16,7 @@ public class ScoreManager {
     private int score = 0;
 
     public void addScore(int amount) {
-    score += amount;
+        score += amount;
     }
 
     public int getScore() {
@@ -57,11 +57,11 @@ public class ScoreManager {
         Image lifeImg = loader.getPacmanRightImage();
         for (int i = 0; i < lives; i++) {
             gc.drawImage(
-                lifeImg,
-                tileSize * (i + 0.2),
-                tileSize / 6.0,
-                tileSize / 1.5,
-                tileSize / 1.5
+                    lifeImg,
+                    tileSize * (i + 0.2),
+                    tileSize / 6.0,
+                    tileSize / 1.5,
+                    tileSize / 1.5
             );
         }
 

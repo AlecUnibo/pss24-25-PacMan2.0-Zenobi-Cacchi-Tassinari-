@@ -9,9 +9,6 @@ import com.pacman.GameMap;
 import java.util.Iterator;
 import com.pacman.SoundManager;
 
-
-
-
 public class AllTypeCollisionsStrategy implements CollisionStrategy {
 
     private final GhostManager ghostManager;
@@ -19,14 +16,15 @@ public class AllTypeCollisionsStrategy implements CollisionStrategy {
     private final ScoreManager scoreManager;
     private final GameMap gameMap;
 
+    /**Inizializza con riferimenti ai manager coinvolti nelle collisioni.*/
     public AllTypeCollisionsStrategy(GhostManager ghostManager, FruitManager fruitManager, ScoreManager scoreManager, GameMap gameMap ) {
         this.ghostManager = ghostManager;
         this.fruitManager = fruitManager;
         this.scoreManager = scoreManager;
         this.gameMap = gameMap;
-
     }
 
+    /** Rimuove il cibo normale e aggiunge 10 punti alla collisione.*/
     @Override
     public void handleFoodCollision(PacMan pacman, Block block) {
         Iterator<Block> it = gameMap.getFoods().iterator();
@@ -34,13 +32,13 @@ public class AllTypeCollisionsStrategy implements CollisionStrategy {
             Block food = it.next();
             if (food.collidesWith(block)) {
                 it.remove();
-                scoreManager.addScore(10); // 🔥 assicurati che ci sia
+                scoreManager.addScore(10);
                 break;
             }
         }
     }
 
-
+    /** Rimuove la power-food, il cibo adiacente, assegna 50 punti e attiva scared mode.*/
     @Override
     public void handlePowerFoodCollision(PacMan pacman, Block block) {
         Iterator<Block> it = gameMap.getPowerFoods().iterator();
@@ -51,7 +49,6 @@ public class AllTypeCollisionsStrategy implements CollisionStrategy {
                 break;
             }
         }
-
         Iterator<Block> foodIt = gameMap.getFoods().iterator();
         while (foodIt.hasNext()) {
             Block f = foodIt.next();
@@ -60,38 +57,36 @@ public class AllTypeCollisionsStrategy implements CollisionStrategy {
                 break;
             }
         }
-
         scoreManager.addScore(50);
         ghostManager.activateScaredMode();
     }
 
+    /** Annulla il movimento di Pac-Man contro un muro.*/
     @Override
     public void handleWallCollision(PacMan pacman, Block wallBlock) {
-        // Muro: annulla il movimento
         pacman.undoMove();
     }
 
+    /** Gestisce collisione con fantasma normale, sottraendo una vita.*/
     @Override
     public void handleGhostCollision(PacMan pacman, Block  ghost) {
-        pacman.die(); // o pacman.setAlive(false);
+        pacman.die();
     }
 
+    /** Rimuove il fantasma spaventato, programma il respawn e assegna 200 punti.*/
     @Override
     public void handleScaredGhostCollision(PacMan pacman, Block ghost) {
-        ghostManager.removeGhost(ghost); // toglie dalla lista dei fantasmi attivi
-        ghostManager.scheduleGhostRespawn(ghost); // lo fa riapparire nella gabbia
+        ghostManager.removeGhost(ghost);
+        ghostManager.scheduleGhostRespawn(ghost);
         scoreManager.addScore(200);
         SoundManager.playSound("eat_ghost");
-
     }
 
-
-
-
+    /** Consuma un frutto, aggiunge i punti e registra l'immagine.*/
     @Override
     public void handleFruitCollision(PacMan pacman, FruitManager.FruitType fruit) {
         fruitManager.consumeFruit(fruit);
         scoreManager.addScore(fruit.getScore());
-        // Effetti bonus casuali già gestiti nel fruitManager
+        scoreManager.addCollectedFruit(fruit);
     }
 }

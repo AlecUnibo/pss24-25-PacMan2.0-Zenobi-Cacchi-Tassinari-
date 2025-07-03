@@ -5,10 +5,9 @@ import com.pacman.Direction;
 import com.pacman.GameMap;
 import com.pacman.PacMan;
 
-/**
- * Strategia per fantasma in stato spaventato: movimento casuale via timer.
- */
 public class ScaredGhostStrategy extends AbstractGhostStrategy {
+
+    /** La strategia del fantasma spaventato muove in direzione casuale a intervalli.*/
     public ScaredGhostStrategy(GameMap map, PacMan game) {
         super(map, game);
     }

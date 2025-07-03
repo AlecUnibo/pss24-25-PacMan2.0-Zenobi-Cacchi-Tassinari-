@@ -68,7 +68,7 @@ public class MainMenu {
         startButton.setOnAction(e -> launchGame());
 
         instructions.setOnMouseClicked((MouseEvent e) -> {
-            
+
             VBox instructionsBox = new VBox(20);
             instructionsBox.setAlignment(Pos.CENTER);
             instructionsBox.setStyle("-fx-background-color: black;");
@@ -139,16 +139,16 @@ public class MainMenu {
         });
 
 
-    skinCloset.setOnMouseClicked(e -> System.out.println("ARMADIO SKIN: da implementare"));
+        skinCloset.setOnMouseClicked(e -> System.out.println("ARMADIO SKIN: da implementare"));
 
-    menuBox.getChildren().addAll(startButton, instructions, skinCloset);
-    root.getChildren().setAll(menuBox);
-}
+        menuBox.getChildren().addAll(startButton, instructions, skinCloset);
+        root.getChildren().setAll(menuBox);
+    }
 
 
     // Inizia una nuova partita creando il pannello di gioco e sostituendo il menu.
     private void launchGame() {
-        PacMan pacmanGame = new PacMan(this); 
+        PacMan pacmanGame = new PacMan(this);
         root.getChildren().setAll(pacmanGame);
         pacmanGame.requestFocus();
     }

@@ -11,7 +11,7 @@ public class App extends Application {
         primaryStage.setTitle("Pac-Man");
         primaryStage.setOnCloseRequest(e -> {
             System.exit(0);
-        });        
+        });
         MainMenu menu = new MainMenu(primaryStage);
         menu.show();
     }

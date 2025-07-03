@@ -4,19 +4,23 @@ import com.pacman.Block;
 import com.pacman.PacMan;
 import com.pacman.FruitManager.FruitType;
 
-
 public interface CollisionStrategy {
 
+    /** Gestisce collisioni con cibo normale*/
     void handleFoodCollision(PacMan pacman, Block foodBlock);
-    
-    void handlePowerFoodCollision(PacMan pacman, Block powerFoodBlock);
-    
-    void handleWallCollision(PacMan pacman, Block wallBlock);
-    
-    void handleGhostCollision(PacMan pacman, Block ghost);
-    
-    void handleScaredGhostCollision(PacMan pacman, Block ghost);
-    
-    void handleFruitCollision(PacMan pacman, FruitType fruit);
 
+    /** Gestisce collisioni con power-food.*/
+    void handlePowerFoodCollision(PacMan pacman, Block powerFoodBlock);
+
+    /** Gestisce collisioni con muri.*/
+    void handleWallCollision(PacMan pacman, Block wallBlock);
+
+    /** Gestisce collisioni con fantasmi normali*/
+    void handleGhostCollision(PacMan pacman, Block ghost);
+
+    /** Gestisce collisioni con fantasmi spaventati.*/
+    void handleScaredGhostCollision(PacMan pacman, Block ghost);
+
+    /** Gestisce collisioni con frutti.*/
+    void handleFruitCollision(PacMan pacman, FruitType fruit);
 }

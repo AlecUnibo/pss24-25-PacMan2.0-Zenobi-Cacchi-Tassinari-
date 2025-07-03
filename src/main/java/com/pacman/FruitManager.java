@@ -30,12 +30,14 @@ public class FruitManager {
         resetTimers();
     }
 
+    //resetta fase e ritardi per il timer dei frutti
     private void resetTimers() {
         phase = 0;
         remainingDelay = FIRST_DELAY_MS;
         lastPhaseStart = 0;
     }
 
+    //avvia il thread che gestisce spawn e rimozione dei frutti
     public synchronized void startFruitTimer() {
         if (running) return;
         running = true;
@@ -45,6 +47,7 @@ public class FruitManager {
         worker.start();
     }
 
+    //interrompe temporaneamente il timer mantenendo il ritardo residuo
     public synchronized void pauseFruitTimer() {
         if (!running) return;
         running = false;
@@ -53,6 +56,7 @@ public class FruitManager {
         worker.interrupt();
     }
 
+    //ciclo principale che gestisce spawn, durata visibilità e rimozione dei frutti
     private void runLoop() {
         while (running && phase < 3) {
             if (phase == 0 || phase == 2) {
@@ -69,7 +73,7 @@ public class FruitManager {
             } else if (phase == 1) {
                 long start = System.currentTimeMillis();
                 while (running && !fruits.isEmpty() &&
-                       System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
+                        System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -86,7 +90,7 @@ public class FruitManager {
         if (phase == 3 && running) {
             long start = System.currentTimeMillis();
             while (running && !fruits.isEmpty() &&
-                   System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
+                    System.currentTimeMillis() - start < FRUIT_VISIBLE_MS) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ignored) {}
@@ -95,6 +99,7 @@ public class FruitManager {
         }
     }
 
+    //genera un nuovo frutto se non è stato superato il massimo per livello
     private void spawnFruit() {
         if (spawnCount >= MAX_FRUITS_PER_LEVEL) return;
         int col = PacMan.COLUMN_COUNT / 2;
@@ -106,19 +111,21 @@ public class FruitManager {
         spawnCount++;
     }
 
+    //rimuove l'ultimo frutto dall'elenco
     private void removeLastFruit() {
         if (!fruits.isEmpty()) {
             fruits.remove(fruits.size() - 1);
         }
     }
 
+    //gestisce raccolta del frutto con possibile power-up
     public FruitType collectFruit(Block pacman) {
         for (int i = 0; i < fruits.size(); i++) {
             Fruit f = fruits.get(i);
             if (pacman.x < f.getX() + PacMan.TILE_SIZE &&
-                pacman.x + pacman.width > f.getX() &&
-                pacman.y < f.getY() + PacMan.TILE_SIZE &&
-                pacman.y + pacman.height > f.getY()) {
+                    pacman.x + pacman.width > f.getX() &&
+                    pacman.y < f.getY() + PacMan.TILE_SIZE &&
+                    pacman.y + pacman.height > f.getY()) {
                 fruits.remove(i);
                 if (phase == 1) {
                     phase = 2;
@@ -143,15 +150,16 @@ public class FruitManager {
     public FruitType getCollidingFruit(Block pacman) {
         for (Fruit f : fruits) {
             if (pacman.x < f.getX() + PacMan.TILE_SIZE &&
-                pacman.x + pacman.width > f.getX() &&
-                pacman.y < f.getY() + PacMan.TILE_SIZE &&
-                pacman.y + pacman.height > f.getY()) {
+                    pacman.x + pacman.width > f.getX() &&
+                    pacman.y < f.getY() + PacMan.TILE_SIZE &&
+                    pacman.y + pacman.height > f.getY()) {
                 return f.getType();
             }
         }
         return null;
     }
 
+    //raddoppia velocità di Pac-Man per 5 secondi
     private void activateSpeedPower() {
         game.setSpeedMultiplier(2.0);
         new Thread(() -> {
@@ -160,10 +168,12 @@ public class FruitManager {
         }, "SpeedPowerTimer").start();
     }
 
+    //congela i fantasmi per 5 secondi
     private void activateFreezePower() {
         game.freezeGhosts(5_000);
     }
 
+    //disegna tutti i frutti attualmente presenti
     public void draw(GraphicsContext gc) {
         for (Fruit f : fruits) {
             Image img = switch (f.getType()) {
@@ -175,6 +185,7 @@ public class FruitManager {
         }
     }
 
+    //resetta stato dei frutti all'inizio di un nuovo livello
     public synchronized void resetLevel() {
         fruits.clear();
         spawnCount = 0;
@@ -185,6 +196,7 @@ public class FruitManager {
         resetTimers();
     }
 
+    //resetta lo stato dei frutti dopo perdita vita
     public synchronized void resetAfterLifeLost() {
         fruits.clear();
         if (running) {
@@ -194,6 +206,7 @@ public class FruitManager {
         resetTimers();
     }
 
+    //wrap per le proprietà di un frutto (posizione e tipo)
     private static class Fruit {
         private final int x, y;
         private final FruitType type;
@@ -207,18 +220,20 @@ public class FruitManager {
         FruitType getType() { return type; }
     }
 
+    //definizione tipi di frutto con punteggio associato
     public enum FruitType {
         CHERRY(200), APPLE(400), STRAWBERRY(800);
         private final int score;
         FruitType(int s) { score = s; }
         public int getScore() { return score; }
-    }   
+    }
 
+    //rimuove il frutto del tipo specificato
     public void consumeFruit(FruitType type) {
         fruits.removeIf(f -> f.getType() == type);
     }
 
-
+    //dorme a spezzoni per rispettare pause
     private void sleepWithPause(long duration) throws InterruptedException {
         long target = System.currentTimeMillis() + duration;
         while (running) {

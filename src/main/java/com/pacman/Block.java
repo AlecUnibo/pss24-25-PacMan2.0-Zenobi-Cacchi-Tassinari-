@@ -54,12 +54,10 @@ public class Block {
     // === COLLISIONE ===
     public boolean collidesWith(Block other) {
         return this.x < other.x + other.width &&
-               this.x + this.width > other.x &&
-               this.y < other.y + other.height &&
-               this.y + this.height > other.y;
+                this.x + this.width > other.x &&
+                this.y < other.y + other.height &&
+                this.y + this.height > other.y;
     }
-
-    // === COSTRUTTORI ===
 
     // Costruttore per blocchi di dimensione di default (tile Pac-Man)
     public Block(Image image, int x, int y) {
@@ -86,7 +84,6 @@ public class Block {
     }
 
     // === ENUM ===
-
     public enum GhostType {
         RED, BLUE, ORANGE, PINK
     }

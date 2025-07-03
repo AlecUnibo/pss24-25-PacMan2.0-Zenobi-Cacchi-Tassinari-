@@ -4,14 +4,12 @@ import com.pacman.Block;
 import com.pacman.Direction;
 import com.pacman.GameMap;
 import com.pacman.PacMan;
-
 import java.util.*;
-/**
- * Strategia per il fantasma ORANGE: alterna chase e random ogni ORANGE_PHASE_MS.
- */
+
 public class OrangeGhostStrategy extends AbstractGhostStrategy {
     private final Map<Block, Boolean> orangeChaseState = new HashMap<>();
 
+    /** Alterna fase di inseguimento e casuale ogni ORANGE_PHASE_MS.*/
     public OrangeGhostStrategy(GameMap map, PacMan game) {
         super(map, game);
     }
