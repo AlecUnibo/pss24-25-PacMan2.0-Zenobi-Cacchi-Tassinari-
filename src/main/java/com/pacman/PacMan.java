@@ -410,6 +410,9 @@ public class PacMan extends Pane {
         loseLife();
     }
 
+    public void undoMove(){
+    }
+
     private void proceedAfterDeathSound() {
         waitingForDeathSound = false;
         if (lives <= 0) {
