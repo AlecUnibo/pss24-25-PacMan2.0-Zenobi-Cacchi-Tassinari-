@@ -12,6 +12,9 @@ repositories {
 dependencies {
     implementation 'org.openjfx:javafx-controls:17'
     implementation 'org.openjfx:javafx-fxml:17'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly   'org.junit.jupiter:junit-jupiter-engine:5.10.0'
 }
 
 javafx {
@@ -27,7 +30,7 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-// Configurazione del fat‑jar con Shadow plugin
+// Fat‑jar configuration
 shadowJar {
     archiveBaseName.set('PacManStandalone')
     archiveClassifier.set('')
@@ -35,9 +38,10 @@ shadowJar {
     manifest {
         attributes 'Main-Class': 'com.pacman.App'
     }
-    // Includi tutte le risorse (cartelle di risorse principali)
     from(sourceSets.main.resources.srcDirs)
 }
-
-// Assicura che build generi anche lo shadowJar
 build.dependsOn shadowJar
+
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.pacman.PacManMovementTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-07-04T13:46:01.115Z" hostname="LAPTOP-89T8E2EK" time="0.051">
+  <properties/>
+  <testcase name="cannotMove_intoWall_stopsAtBoundary()" classname="com.pacman.PacManMovementTest" time="0.026"/>
+  <testcase name="canMove_right_movesXPositive()" classname="com.pacman.PacManMovementTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
