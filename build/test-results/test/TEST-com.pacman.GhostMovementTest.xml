@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.pacman.GhostMovementTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-07-04T13:46:01.071Z" hostname="LAPTOP-89T8E2EK" time="0.035">
-  <properties/>
-  <testcase name="blueStrategy_returnsValidDirection()" classname="com.pacman.GhostMovementTest" time="0.017"/>
-  <testcase name="cageStrategy_alwaysUp()" classname="com.pacman.GhostMovementTest" time="0.017"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

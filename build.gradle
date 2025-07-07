@@ -10,15 +10,12 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.openjfx:javafx-controls:17'
-    implementation 'org.openjfx:javafx-fxml:17'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
-    testRuntimeOnly   'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    implementation 'org.openjfx:javafx-controls:17:win'
+    implementation 'org.openjfx:javafx-fxml:17:win'
 }
 
 javafx {
-    version = '17'
+    version = "17"
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
@@ -30,18 +27,16 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-// Fat‑jar configuration
 shadowJar {
-    archiveBaseName.set('PacManStandalone')
-    archiveClassifier.set('')
-    archiveVersion.set('1.0')
-    manifest {
-        attributes 'Main-Class': 'com.pacman.App'
-    }
-    from(sourceSets.main.resources.srcDirs)
-}
-build.dependsOn shadowJar
+    archiveBaseName.set('PacManProject')
+    archiveClassifier.set('all')
+    archiveVersion.set('')
 
-test {
-    useJUnitPlatform()
+    mergeServiceFiles()
+
+    manifest {
+        attributes(
+            'Main-Class': 'com.pacman.App'
+        )
+    }
 }
