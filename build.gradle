@@ -32,6 +32,16 @@ dependencies {
 
 application {
     mainClass = 'com.pacman.App'
+    // Includi i moduli JavaFX necessari a runtime
+    applicationDefaultJvmArgs = [
+        '--module-path', configurations.runtimeClasspath.asPath,
+        '--add-modules', 'javafx.controls,javafx.fxml'
+    ]
+}
+
+// Configura il task run per usare i jvmArgs definiti sopra
+tasks.named('run') {
+    jvmArgs = application.applicationDefaultJvmArgs
 }
 
 tasks.withType(JavaCompile).configureEach {

@@ -29,6 +29,7 @@ public class GhostManager {
     private final Set<Block> ghostsInTunnel = new HashSet<>();
     private boolean frozen = false;
     private long frozenEndTime = 0;
+    private final Set<Block> protectedFromScared = new HashSet<>();
 
     // Strategie base per ogni fantasma
     private final Map<Block, GhostMovementStrategy> baseStrategies = new HashMap<>();
@@ -139,6 +140,7 @@ public class GhostManager {
     public void activateScaredMode() {
         ghostsAreScared = true;
         scaredEndTime = System.currentTimeMillis() + SCARED_DURATION_MS;
+        protectedFromScared.clear();
         for (Block g : ghosts) {
             g.isScared = true;
             g.setScared(true); // <--- aggiunto
@@ -180,8 +182,8 @@ public class GhostManager {
                     pacman.y + pacman.height > g.y;
             if (!collided) continue;
             if (g.isScared) {
-                points += 200;
                 eaten.add(g);
+                protectedFromScared.add(g);    // ➞ proteggi questo fantasma
                 SoundManager.playSound("eat_ghost");
             } else {
                 onHit.run();
@@ -197,6 +199,7 @@ public class GhostManager {
 
     public void scheduleGhostRespawn(Block g) {
         g.isScared = false;
+        g.setScared(false);
         g.image = g.originalImage;
         g.x = ghostPortal.x + (ghostPortal.width - g.width) / 2;
         g.y = ghostPortal.y + (ghostPortal.height - g.height) / 2;
@@ -211,8 +214,10 @@ public class GhostManager {
             RespawnGhost rg = it.next();
             if (now >= rg.respawnTime) {
                 rg.ghost.isScared = false;
+                rg.ghost.setScared(false);
                 rg.ghost.image    = rg.ghost.originalImage;
                 ghosts.add(rg.ghost);
+                protectedFromScared.remove(rg.ghost);
                 it.remove();
             }
         }
@@ -264,7 +269,7 @@ public class GhostManager {
             }
 
             GhostMovementStrategy strategy;
-            if (g.isScared) {
+            if (g.isScared && !protectedFromScared.contains(g)) {
                 strategy = scaredStrategy;
             } else {
                 strategy = baseStrategies.get(g);
