@@ -644,7 +644,7 @@ private void spawnFruit() {
 
 ```
 
-Nel gioco è stato implementato un sistema che limita lo spawn della frutta speciale a una sola tipologia per livello, con un massimo di due o tre apparizioni totali. Questo comportamento è gestito all’interno della classe FruitManager, dove per ogni livello viene scelta casualmente una FruitType (ciliegia, mela o fragola), che rimane costante fino al caricamento di un nuovo livello. Inoltre, un contatore interno regola il numero massimo di spawn, impedendo ulteriori apparizioni una volta raggiunto il limite. Questo approccio contribuisce a bilanciare la difficoltà e rende la frutta un evento raro e strategico, anziché una fonte costante di punti o potenziamenti.
+Nel gioco è stato implementato un sistema che limita lo spawn della frutta speciale a una sola tipologia per livello, con un massimo di due apparizioni totali. Questo comportamento è gestito all’interno della classe FruitManager, dove per ogni livello viene scelta casualmente una FruitType (ciliegia, mela o fragola), che rimane costante fino al caricamento di un nuovo livello. Inoltre, un contatore interno regola il numero massimo di spawn, impedendo ulteriori apparizioni una volta raggiunto il limite. Questo approccio contribuisce a bilanciare la difficoltà e rende la frutta un evento raro e strategico, anziché una fonte costante di punti o potenziamenti.
 
 ### Temporizzazione della frutta
 
@@ -676,7 +676,7 @@ private void runLoop() {
 
 ```
 
-La frutta nel gioco non è sempre presente, ma appare e scompare ciclicamente seguendo una logica temporale ben definita. Questo comportamento è gestito da un thread interno nella classe FruitManager, che alterna tre fasi: attesa, comparsa e rimozione. Dopo un primo ritardo iniziale, la frutta viene mostrata per 8 secondi, poi rimossa per un secondo intervallo di attesa e infine può riapparire una seconda volta (fino a un massimo prestabilito). Questa logica temporizzata rende la raccolta della frutta più strategica, poiché il giocatore ha una finestra limitata per approfittarne.
+La frutta nel gioco non è sempre presente, ma appare e scompare ciclicamente seguendo una logica temporale ben definita. Questo comportamento è gestito da un thread interno nella classe FruitManager, che alterna tre fasi: attesa, comparsa e rimozione. Dopo un primo ritardo iniziale, la frutta viene mostrata per 8 secondi, poi rimossa per un secondo intervallo di attesa e infine può riapparire una seconda volta. Questa logica temporizzata rende la raccolta della frutta più strategica, poiché il giocatore ha una finestra limitata per approfittarne.
 
 ## Commenti finali
 
@@ -731,6 +731,4 @@ In generale, ho cercato di mantenere un equilibrio tra estetica e funzionalità.
 
 3. Il gioco si aprirà a schermo e sarà immediatamente giocabile.
 
-Il menu iniziale permette di iniziare una partita, leggere le regole e il tutorial e uscire dall’applicazione.
-
-> ⚠️ Requisiti minimi: sistema operativo Windows, nessuna installazione esterna necessaria (grazie alla JDK inclusa nel pacchetto).
+Il menu iniziale permette di iniziare una partita, leggere regole e tutorial e uscire dall’applicazione.
