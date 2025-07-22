@@ -30,12 +30,6 @@ public class SoundManager {
                 muteControls.put(name, bc);
                 bc.setValue(false); // inizialmente non mutato
             }
-            // Se supporta MASTER_GAIN
-            if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
-                FloatControl fc = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                volumeControls.put(name, fc);
-                fc.setValue(0.0f);
-            }
 
             soundClips.put(name, clip);
             System.out.println("Suono caricato con successo: " + name);
