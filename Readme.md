@@ -188,46 +188,50 @@ Questa soluzione, rispetto all’alternativa di semplici switch o if su tipo di 
 ```mermaid
 
 classDiagram
+    
     class PacMan {
-        -MovementStrategy movementStrategy
-        +startGameLoop()
-        +onKeyPressed(KeyCode)
+        - MovementStrategy movementStrategy
+        + startGameLoop()
+        + onKeyPressed(KeyCode)
     }
-
     class MovementStrategy {
-        +move(Block, KeyCode, GameMap, double)
+        <<interface>>
+        + move(Block, KeyCode, GameMap, double)
     }
     class KeyboardMovementStrategy {
-        +move(Block, KeyCode, GameMap, double)
+        + move(Block, KeyCode, GameMap, double)
     }
+    PacMan --> MovementStrategy
+    MovementStrategy <|.. KeyboardMovementStrategy
 
     class GhostManager {
-        -Map~Block,GhostMovementStrategy~ baseStrategies
-        +moveGhosts()
+        - Map~Block, GhostMovementStrategy~ baseStrategies
+        + moveGhosts()
     }
-
     class GhostMovementStrategy {
-        +getNextDirection(Block, long)
+        <<interface>>
+        + getNextDirection(Block, long)
     }
     class AbstractGhostStrategy {
-        +getNextDirection(Block, long)
-        #availableDirections(Block)
+        <<abstract>>
+        + getNextDirection(Block, long)
+        # availableDirections(Block)
     }
     class BlueGhostStrategy
     class RedGhostStrategy
     class OrangeGhostStrategy
     class PinkGhostStrategy
+    class ScaredGhostStrategy
     class CageGhostStrategy
 
-	PacMan --> MovementStrategy
-	MovementStrategy --> KeyboardMovementStrategy
-    GhostMovementStrategy --> AbstractGhostStrategy
-    AbstractGhostStrategy --> BlueGhostStrategy
-    AbstractGhostStrategy --> RedGhostStrategy
-    AbstractGhostStrategy --> OrangeGhostStrategy
-    AbstractGhostStrategy --> PinkGhostStrategy
-    GhostMovementStrategy --> CageGhostStrategy
     GhostManager --> GhostMovementStrategy
+    GhostMovementStrategy <|.. AbstractGhostStrategy
+    AbstractGhostStrategy <|-- BlueGhostStrategy
+    AbstractGhostStrategy <|-- RedGhostStrategy
+    AbstractGhostStrategy <|-- OrangeGhostStrategy
+    AbstractGhostStrategy <|-- PinkGhostStrategy
+    AbstractGhostStrategy <|-- ScaredGhostStrategy
+    GhostMovementStrategy <|.. CageGhostStrategy
 
 ```
 
