@@ -24,17 +24,17 @@ public class SoundManager {
             Clip clip = AudioSystem.getClip();
             clip.open(audioInput);
 
-            // Se supporta BooleanControl.MUTE, usalo per silenziare completamente
+            // Se supporta BooleanControl.MUTE
             if (clip.isControlSupported(BooleanControl.Type.MUTE)) {
                 BooleanControl bc = (BooleanControl) clip.getControl(BooleanControl.Type.MUTE);
                 muteControls.put(name, bc);
                 bc.setValue(false); // inizialmente non mutato
             }
-            // Se supporta MASTER_GAIN, salvalo per fade o controllo volume
+            // Se supporta MASTER_GAIN
             if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
                 FloatControl fc = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
                 volumeControls.put(name, fc);
-                fc.setValue(0.0f); // default 0 dB
+                fc.setValue(0.0f);
             }
 
             soundClips.put(name, clip);

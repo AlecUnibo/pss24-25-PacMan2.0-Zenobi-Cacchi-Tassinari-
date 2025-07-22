@@ -146,21 +146,21 @@ public class MainMenu {
     }
 
 
-    // Inizia una nuova partita creando il pannello di gioco e sostituendo il menu.
+    // Inizia una nuova partita creando il pannello di gioco e sostituendo il menu
     private void launchGame() {
         PacMan pacmanGame = new PacMan(this);
         root.getChildren().setAll(pacmanGame);
         pacmanGame.requestFocus();
     }
 
-    // Rende visibile questo menu sullo stage principale. 
+    // Rende visibile questo menu sullo stage principale
     public void show() {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
     }
 
-    // Torna alla schermata del menu principale ricostruendolo da zero. 
+    // Torna alla schermata del menu principale ricostruendolo da zero
     public void returnToMenu() {
         buildMenu();
         show();

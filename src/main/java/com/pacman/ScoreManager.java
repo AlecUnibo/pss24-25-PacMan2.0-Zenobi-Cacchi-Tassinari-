@@ -94,7 +94,7 @@ public class ScoreManager {
         gc.drawImage(volumeImage, iconX, iconY, iconSize, iconSize);
     }
 
-    /** Aggiunge l’immagine del frutto raccolto alla lista per il display successivo. */
+    /** Aggiunge l’immagine del frutto raccolto alla lista */
     public void addCollectedFruit(FruitManager.FruitType type) {
         Image img = switch (type) {
             case CHERRY     -> loader.getCherryImage();
@@ -104,7 +104,7 @@ public class ScoreManager {
         collectedFruits.add(img);
     }
 
-    /** Restituisce il raccolto corrente. */
+    /** Restituisce il frutto raccolto corrente. */
     public List<Image> getCollectedFruits() {
         return collectedFruits;
     }
